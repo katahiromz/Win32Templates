@@ -362,3 +362,30 @@ DWORD GetComCtl32VersionDx(VOID)
         return 0;
     return MAKELONG(dvi.dwMinorVersion, dvi.dwMajorVersion);
 }
+
+void AssertDx(const char *text, const char *file, int line)
+{
+    char buf[512];
+    INT id;
+    StringCchPrintfA(buf, _countof(buf),
+        "Assertion Failure!\n\n"
+        "File: %s\n"
+        "Line: %d\n"
+        "Expression: %s\n\n"
+        "Click [Abort] to terminate the application.\n"
+        "Click [Retry] to debug the application.\n"
+        "Click [Ignore] to ignore this message.",
+        file, line, text);
+    id = MessageBoxA(NULL, buf, "ASSERTDX", MB_ICONERROR | MB_ABORTRETRYIGNORE);
+    switch (id)
+    {
+    case IDABORT:
+        ExitProcess(0xDEADFACE);
+        break;
+    case IDRETRY:
+        DebugBreak();
+        break;
+    case IDIGNORE:
+        break;
+    }
+}

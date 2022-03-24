@@ -19,13 +19,22 @@ LPWSTR GetWindowTextDxW(HWND hwnd);
 #define GetDlgItemTextDxW(hwnd, id) GetWindowTextDxW(GetDlgItem((hwnd), (id)))
 INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize);
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size);
+void AssertDx(const char *text, const char *file, int line);
 
 #ifdef NDEBUG
     #define DebugPrintfA
     #define DebugPrintfW
+    #define ASSERTDX(x)
+    #define VERIFYDX(x) do { \
+        if (!(x)) AssertDx(#x, __FILE__, __LINE__); \
+    } while (0)
 #else
     void DebugPrintfA(const char *fmt, ...);
     void DebugPrintfW(const wchar_t *fmt, ...);
+    #define ASSERTDX(x) do { \
+        if (!(x)) AssertDx(#x, __FILE__, __LINE__); \
+    } while (0)
+    #define VERIFYDX ASSERTDX
 #endif
 
 #ifdef UNICODE

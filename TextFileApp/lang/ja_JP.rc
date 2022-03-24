@@ -99,6 +99,18 @@ STRINGTABLE
     IDS_TOOL_NEW, "新規作成"
     IDS_TOOL_OPEN, "開く"
     IDS_TOOL_SAVE, "保存"
+    IDS_TOOL_UNDO, "元に戻す"
+    IDS_TOOL_REDO, "やり直す"
+    IDS_TOOL_CUT, "切り取り"
+    IDS_TOOL_COPY, "コピー"
+    IDS_TOOL_PASTE, "貼り付け"
+    IDS_TOOL_DELETE, "削除"
+    IDS_TOOL_PRINTPREVIEW, "印刷プレビュー"
+    IDS_TOOL_PRINT, "印刷"
+    IDS_TOOL_PROPERTIES, "プロパティ"
+    IDS_TOOL_FIND, "検索"
+    IDS_TOOL_REPLACE, "置換"
+    IDS_TOOL_HELP, "ヘルプ"
 }
 
 //////////////////////////////////////////////////////////////////////////////

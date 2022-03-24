@@ -364,9 +364,41 @@ BOOL doCreateToolbar(HWND hwnd)
 {
     DWORD style, exstyle;
     INT id;
-    BOOL bStandardButtons = TRUE; // TODO: Change
-    BOOL bAddString = TRUE; // TODO: Change
+    BOOL bStandardButtons = FALSE; // TODO: Change
+    BOOL bAddString = FALSE; // TODO: Change
     BOOL bList = TRUE; // TODO: Change
+    BOOL bUseLargeButtons = TRUE; // TODO: Change
+    // TODO: Change toolbar buttons
+    static TBBUTTON buttons[] =
+    {
+        { STD_FILENEW, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_FILEOPEN, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_FILESAVE, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_UNDO, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_REDOW, ID_REDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_CUT, ID_CUT, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_COPY, ID_COPY, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_PASTE, ID_PASTE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_DELETE, ID_DELETE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_PROPERTIES, ID_PROPERTIES, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_FIND, ID_FIND, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_REPLACE, ID_REPLACE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_PRINTPRE, ID_PRINTPREVIEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_PRINT, ID_PRINT, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_HELP, ID_HELP, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+    };
+    size_t i;
+    for (i = 0; i < _countof(buttons); ++i)
+    {
+        buttons[i].iString = -1;
+    }
 
     style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
     if (g_settings.bShowToolbar)
@@ -383,63 +415,50 @@ BOOL doCreateToolbar(HWND hwnd)
     SendMessage(g_hToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
     SetWindowLongPtr(g_hToolbar, GWL_STYLE, GetWindowStyle(g_hToolbar) | TBSTYLE_FLAT);
 
+    if (bAddString)
+    {
+        // TODO: Add toolbar strings
+        buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
+        buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
+        buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+    }
+
     // Enable multiple image lists
     SendMessage(g_hToolbar, CCM_SETVERSION, 5, 0);
 
     if (bStandardButtons)
     {
-        // TODO: Change toolbar buttons
-        // You can use: STD_COPY, STD_PASTE, STD_CUT, STD_PRINT, STD_DELETE,
-        //              STD_PRINTPRE, STD_FILENEW, STD_PROPERTIES, STD_FILEOPEN,
-        //              STD_REDOW, STD_FILESAVE, STD_REPLACE, STD_FIND,
-        //              STD_UNDO, STD_HELP
-        static TBBUTTON buttons[] =
-        {
-            { STD_FILENEW, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-            { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
-            { STD_FILEOPEN, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-            { STD_FILESAVE, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-        };
+        if (bUseLargeButtons)
         {
             TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
-            //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
             SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
         }
-
-        if (bAddString)
+        else
         {
-            // TODO: Add toolbar strings
-            buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
-            buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
-            buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
+            SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
         }
 
         SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
     else
     {
-        // TODO: Change toolbar buttons
-        static TBBUTTON buttons[] =
-        {
-            { 0, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-            { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
-            { 1, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-            { 2, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-        };
-        INT nButtonImageWidth = 32; // TODO: Change
-        INT nButtonImageHeight = 32; // TODO: Change
-        INT idBitmap = IDB_TOOLBAR; // TODO: Change
+        INT nButtonImageWidth, nButtonImageHeight;
+        INT idBitmap;
         COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
 
-        SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
-
-        if (bAddString)
+        if (bUseLargeButtons)
         {
-            // TODO: Add toolbar strings
-            buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
-            buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
-            buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+            idBitmap = IDB_LARGETOOLBAR;
+            nButtonImageWidth = nButtonImageHeight = 24;
         }
+        else
+        {
+            idBitmap = IDB_SMALLTOOLBAR;
+            nButtonImageWidth = nButtonImageHeight = 16;
+        }
+
+        SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
         g_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
                                             nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 0);
@@ -451,7 +470,10 @@ BOOL doCreateToolbar(HWND hwnd)
     }
 
     {
-        DWORD extended = TBSTYLE_EX_DRAWDDARROWS | TBSTYLE_EX_MIXEDBUTTONS | TBSTYLE_EX_HIDECLIPPEDBUTTONS;
+        DWORD extended = 0;
+        extended |= TBSTYLE_EX_DRAWDDARROWS;
+        extended |= TBSTYLE_EX_MIXEDBUTTONS;
+        //extended |= TBSTYLE_EX_HIDECLIPPEDBUTTONS;
         SendMessage(g_hToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
     }
 
@@ -638,6 +660,20 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         g_settings.bShowToolbar = IsWindowVisible(g_hToolbar);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
+    case ID_UNDO:
+    case ID_REDO:
+    case ID_CUT:
+    case ID_COPY:
+    case ID_PASTE:
+    case ID_DELETE:
+    case ID_PRINTPREVIEW:
+    case ID_PRINT:
+    case ID_PROPERTIES:
+    case ID_FIND:
+    case ID_REPLACE:
+    case ID_HELP:
+        ASSERTDX(!"Not implemented yet!");
+        break;
     case IDW_CANVAS:
         if (codeNotify == EN_CHANGE)
         {
@@ -798,8 +834,34 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         CheckMenuItem(hMenu, ID_STATUSBAR, MF_UNCHECKED);
 }
 
+typedef struct ID2IDS
+{
+    INT id;
+    INT ids;
+} ID2IDS;
+
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 {
+    static const ID2IDS id2ids[] =
+    {
+        { ID_NEW, IDS_TOOL_NEW },
+        { ID_OPEN, IDS_TOOL_OPEN },
+        { ID_SAVE, IDS_TOOL_SAVE },
+        { ID_UNDO, IDS_TOOL_UNDO },
+        { ID_REDO, IDS_TOOL_REDO },
+        { ID_CUT, IDS_TOOL_CUT },
+        { ID_COPY, IDS_TOOL_COPY },
+        { ID_PASTE, IDS_TOOL_PASTE },
+        { ID_DELETE, IDS_TOOL_DELETE },
+        { ID_PRINTPREVIEW, IDS_TOOL_PRINTPREVIEW },
+        { ID_PRINT, IDS_TOOL_PRINT },
+        { ID_PROPERTIES, IDS_TOOL_PROPERTIES },
+        { ID_FIND, IDS_TOOL_FIND },
+        { ID_REPLACE, IDS_TOOL_REPLACE },
+        { ID_HELP, IDS_TOOL_HELP }
+    };
+    INT i, id;
+
     if (!pnmhdr)
         return 0;
 
@@ -810,17 +872,14 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
             TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pnmhdr;
             // TODO: set tooltip text for the command
             pTTT->hinst = g_hInstance;
-            switch (pTTT->hdr.idFrom)
+            id = pTTT->hdr.idFrom;
+            for (size_t i = 0; i < _countof(id2ids); ++i)
             {
-            case ID_NEW:
-                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_NEW);
-                return 0;
-            case ID_OPEN:
-                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_OPEN);
-                return 0;
-            case ID_SAVE:
-                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_SAVE);
-                return 0;
+                if (id == id2ids[i].id)
+                {
+                    pTTT->lpszText = MAKEINTRESOURCE(id2ids[i].ids);
+                    break;
+                }
             }
         }
     }

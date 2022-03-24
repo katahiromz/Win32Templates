@@ -99,6 +99,18 @@ STRINGTABLE
     IDS_TOOL_NEW, "New"
     IDS_TOOL_OPEN, "Open"
     IDS_TOOL_SAVE, "Save"
+    IDS_TOOL_UNDO, "Undo"
+    IDS_TOOL_REDO, "Redo"
+    IDS_TOOL_CUT, "Cut"
+    IDS_TOOL_COPY, "Copy"
+    IDS_TOOL_PASTE, "Paste"
+    IDS_TOOL_DELETE, "Delete"
+    IDS_TOOL_PRINTPREVIEW, "Print Preview"
+    IDS_TOOL_PRINT, "Print"
+    IDS_TOOL_PROPERTIES, "Properties"
+    IDS_TOOL_FIND, "Find"
+    IDS_TOOL_REPLACE, "Replace"
+    IDS_TOOL_HELP, "Help"
 }
 
 //////////////////////////////////////////////////////////////////////////////
