@@ -172,11 +172,6 @@ Quit:
     return ret;
 }
 
-void eraseRecent(LPCTSTR pszFile)
-{
-    Recent_Remove(g_settings.pRecent, pszFile);
-}
-
 void addRecent(LPCTSTR pszFile)
 {
     Recent_Add(g_settings.pRecent, pszFile);

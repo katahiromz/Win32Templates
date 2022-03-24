@@ -54,7 +54,6 @@ void Recent_Print(PRECENT pRecent)
     }
 }
 
-
 INT Recent_Find(PRECENT pRecent, LPCTSTR psz)
 {
     INT i;
