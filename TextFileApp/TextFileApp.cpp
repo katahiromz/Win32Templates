@@ -107,11 +107,8 @@ LPTSTR getCommandText(INT id, BOOL bDetail)
     return NULL;
 }
 
-void enableCommand(INT id, BOOL bEnabled, HMENU hMenu = NULL)
+void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
 {
-    if (!hMenu)
-        hMenu = GetMenu(g_hMainWnd);
-
     SendMessage(g_hToolbar, TB_ENABLEBUTTON, id, bEnabled);
 
     if (bEnabled)
@@ -120,11 +117,8 @@ void enableCommand(INT id, BOOL bEnabled, HMENU hMenu = NULL)
         EnableMenuItem(hMenu, id, MF_GRAYED);
 }
 
-void checkCommand(INT id, BOOL bChecked, HMENU hMenu = NULL)
+void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 {
-    if (!hMenu)
-        hMenu = GetMenu(g_hMainWnd);
-
     SendMessage(g_hToolbar, TB_CHECKBUTTON, id, bChecked);
 
     if (bChecked)
@@ -133,20 +127,23 @@ void checkCommand(INT id, BOOL bChecked, HMENU hMenu = NULL)
         CheckMenuItem(hMenu, id, MF_UNCHECKED);
 }
 
-void updateCommandUI(HWND hwnd, HMENU hMenu)
+void updateCommandUI(HWND hwnd, HMENU hMenu = NULL)
 {
+    if (!hMenu)
+        hMenu = GetMenu(g_hMainWnd);
+
     // TODO: Update UI status
     checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
-    enableCommand(ID_REDO, FALSE);
-    enableCommand(ID_PRINTPREVIEW, FALSE);
-    enableCommand(ID_PRINT, FALSE);
-    enableCommand(ID_PROPERTIES, FALSE);
-    enableCommand(ID_FIND, FALSE);
-    enableCommand(ID_REPLACE, FALSE);
-    enableCommand(ID_HELP, FALSE);
-    enableCommand(ID_PAGESETUP, FALSE);
+    enableCommand(ID_REDO, FALSE, hMenu);
+    enableCommand(ID_PRINTPREVIEW, FALSE, hMenu);
+    enableCommand(ID_PRINT, FALSE, hMenu);
+    enableCommand(ID_PROPERTIES, FALSE, hMenu);
+    enableCommand(ID_FIND, FALSE, hMenu);
+    enableCommand(ID_REPLACE, FALSE, hMenu);
+    enableCommand(ID_HELP, FALSE, hMenu);
+    enableCommand(ID_PAGESETUP, FALSE, hMenu);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
