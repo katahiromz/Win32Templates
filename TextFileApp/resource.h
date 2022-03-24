@@ -41,6 +41,14 @@
 #define IDS_TOOL_FIND                       125
 #define IDS_TOOL_REPLACE                    126
 #define IDS_TOOL_HELP                       127
+#define IDS_TOOL_SELECTALL                  128
+#define IDS_TOOL_PAGESETUP                  129
+#define IDS_TOOL_SAVEAS                     130
+#define IDS_TOOL_STATUSBAR                  131
+#define IDS_TOOL_TOOLBAR                    132
+#define IDS_TOOL_RECENT                     133
+#define IDS_TOOL_EXIT                       134
+#define IDS_TOOL_ABOUT                      135
 
 #define ID_EXIT                             100
 #define ID_ABOUT                            101
@@ -63,6 +71,8 @@
 #define ID_FIND                             118
 #define ID_REPLACE                          119
 #define ID_HELP                             120
+#define ID_SELECTALL                        121
+#define ID_PAGESETUP                        122
 #define ID_RECENT_01                        201
 #define ID_RECENT_02                        202
 #define ID_RECENT_03                        203

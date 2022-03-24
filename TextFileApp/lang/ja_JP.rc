@@ -20,12 +20,33 @@ IDR_MAINMENU MENU
         MENUITEM SEPARATOR
         MENUITEM "テスト", ID_TEST
         MENUITEM SEPARATOR
+        MENUITEM "ページ設定(&U)...", ID_PAGESETUP
+        MENUITEM "印刷プレビュー(&V)", ID_PRINTPREVIEW
+        MENUITEM "印刷(&P)...\tCtrl+P", ID_PRINT
+        MENUITEM SEPARATOR
         POPUP "最近使ったファイル(&R)"
         {
             MENUITEM "(なし)", 0, GRAYED
         }
         MENUITEM SEPARATOR
         MENUITEM "終了(&X)\tAlt+F4", ID_EXIT
+    }
+    POPUP "編集(&E)"
+    {
+        MENUITEM "元に戻す(&U)\tCtrl+Z", ID_UNDO
+        MENUITEM "やり直す(&R)\tCtrl+Y", ID_REDO
+        MENUITEM SEPARATOR
+        MENUITEM "切り取り(&T)\tCtrl+X", ID_CUT
+        MENUITEM "コピー(&C)\tCtrl+C", ID_COPY
+        MENUITEM "貼り付け(&P)\tCtrl+V", ID_PASTE
+        MENUITEM "削除(&D)\tDel", ID_DELETE
+        MENUITEM SEPARATOR
+        MENUITEM "検索(&F)...\tCtrl+F", ID_FIND
+        MENUITEM "置換(&E)...\tCtrl+H", ID_REPLACE
+        MENUITEM SEPARATOR
+        MENUITEM "プロパティ(&O)\tAlt+Enter", ID_PROPERTIES
+        MENUITEM SEPARATOR
+        MENUITEM "すべて選択(&A)\tCtrl+A", ID_SELECTALL
     }
     POPUP "表示(&V)"
     {
@@ -96,21 +117,29 @@ STRINGTABLE
     IDS_BUSY, "コマンド実行中..."
     IDS_FILTER, "テキストファイル (*.txt)|*.txt|すべてのファイル (*.*)|*.*|"
     IDS_NONE, "(なし)"
-    IDS_TOOL_NEW, "新規作成"
-    IDS_TOOL_OPEN, "開く"
-    IDS_TOOL_SAVE, "保存"
-    IDS_TOOL_UNDO, "元に戻す"
-    IDS_TOOL_REDO, "やり直す"
-    IDS_TOOL_CUT, "切り取り"
-    IDS_TOOL_COPY, "コピー"
-    IDS_TOOL_PASTE, "貼り付け"
-    IDS_TOOL_DELETE, "削除"
-    IDS_TOOL_PRINTPREVIEW, "印刷プレビュー"
-    IDS_TOOL_PRINT, "印刷"
-    IDS_TOOL_PROPERTIES, "プロパティ"
-    IDS_TOOL_FIND, "検索"
-    IDS_TOOL_REPLACE, "置換"
-    IDS_TOOL_HELP, "ヘルプ"
+    IDS_TOOL_NEW, "新規作成|新しくファイルを作成します。"
+    IDS_TOOL_OPEN, "開く|ファイルを開きます。"
+    IDS_TOOL_SAVE, "保存|現在開いているファイルを保存します。"
+    IDS_TOOL_UNDO, "元に戻す|直前の処理を一つ戻します。"
+    IDS_TOOL_REDO, "やり直す|戻した処理を再度処理します。"
+    IDS_TOOL_CUT, "切り取り|選択内容を切り取ります。"
+    IDS_TOOL_COPY, "コピー|選択内容をクリップボードにコピーします。"
+    IDS_TOOL_PASTE, "貼り付け|クリップボードの内容を貼り付けます。"
+    IDS_TOOL_DELETE, "削除|選択内容を削除します。"
+    IDS_TOOL_PRINTPREVIEW, "印刷プレビュー|印刷内容のイメージを確認します。"
+    IDS_TOOL_PRINT, "印刷|現在のファイルを印刷します。"
+    IDS_TOOL_PROPERTIES, "プロパティ|文書の情報を表示します。"
+    IDS_TOOL_FIND, "検索|指定した文字列を検索します。"
+    IDS_TOOL_REPLACE, "置換|指定した文字列を別の文字列に置き換えます。"
+    IDS_TOOL_HELP, "ヘルプ|ヘルプの内容を表示します。"
+    IDS_TOOL_SELECTALL, "すべて選択|ファイル内容のすべてを選択します。"
+    IDS_TOOL_PAGESETUP, "ページ設定|印刷ページの設定を行います。"
+    IDS_TOOL_SAVEAS, "名前を付けて保存|現在のファイルに名前を付けて保存します。"
+    IDS_TOOL_STATUSBAR, "ステータスバー|ステータスバーの表示を切り替えます。"
+    IDS_TOOL_TOOLBAR, "ツールバー|ツールバーの表示を切り替えます。"
+    IDS_TOOL_RECENT, "最近使ったファイル|最近使ったファイルを開きます。"
+    IDS_TOOL_EXIT, "終了|このアプリを終了します。"
+    IDS_TOOL_ABOUT, "バージョン情報|このアプリのバージョン情報を表示します。"
 }
 
 //////////////////////////////////////////////////////////////////////////////

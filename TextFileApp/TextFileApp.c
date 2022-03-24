@@ -45,7 +45,54 @@ static const ID2IDS g_id2ids[] =
     { ID_FIND, IDS_TOOL_FIND },
     { ID_REPLACE, IDS_TOOL_REPLACE },
     { ID_HELP, IDS_TOOL_HELP },
+    { ID_SELECTALL, IDS_TOOL_SELECTALL },
+    { ID_PAGESETUP, IDS_TOOL_PAGESETUP },
+    { ID_SAVEAS, IDS_TOOL_SAVEAS },
+    { ID_STATUSBAR, IDS_TOOL_STATUSBAR },
+    { ID_TOOLBAR, IDS_TOOL_TOOLBAR },
+    { ID_RECENT_01, IDS_TOOL_RECENT },
+    { ID_RECENT_02, IDS_TOOL_RECENT },
+    { ID_RECENT_03, IDS_TOOL_RECENT },
+    { ID_RECENT_04, IDS_TOOL_RECENT },
+    { ID_RECENT_05, IDS_TOOL_RECENT },
+    { ID_RECENT_06, IDS_TOOL_RECENT },
+    { ID_RECENT_07, IDS_TOOL_RECENT },
+    { ID_RECENT_08, IDS_TOOL_RECENT },
+    { ID_RECENT_09, IDS_TOOL_RECENT },
+    { ID_RECENT_10, IDS_TOOL_RECENT },
+    { ID_RECENT_11, IDS_TOOL_RECENT },
+    { ID_RECENT_12, IDS_TOOL_RECENT },
+    { ID_RECENT_13, IDS_TOOL_RECENT },
+    { ID_RECENT_14, IDS_TOOL_RECENT },
+    { ID_RECENT_15, IDS_TOOL_RECENT },
+    { ID_RECENT_16, IDS_TOOL_RECENT },
+    { ID_RECENT_17, IDS_TOOL_RECENT },
+    { ID_RECENT_18, IDS_TOOL_RECENT },
+    { ID_RECENT_19, IDS_TOOL_RECENT },
+    { ID_RECENT_20, IDS_TOOL_RECENT },
+    { ID_EXIT, IDS_TOOL_EXIT },
+    { ID_ABOUT, IDS_TOOL_ABOUT },
 };
+
+LPTSTR getCommandText(INT id, BOOL bDescription)
+{
+    for (size_t i = 0; i < _countof(g_id2ids); ++i)
+    {
+        if (id == g_id2ids[i].id)
+        {
+            LPTSTR text = LoadStringDx(g_id2ids[i].ids);
+            TCHAR *pch = _tcschr(text, TEXT('|'));
+            if (pch)
+            {
+                *pch = 0;
+                if (bDescription)
+                    return pch + 1;
+            }
+            return text;
+        }
+    }
+    return NULL;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // SETTINGS
@@ -422,6 +469,7 @@ BOOL doCreateToolbar(HWND hwnd)
         { STD_HELP, ID_HELP, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
     };
     size_t i, k;
+    LPTSTR text;
     for (i = 0; i < _countof(buttons); ++i)
     {
         buttons[i].iString = -1;
@@ -449,15 +497,8 @@ BOOL doCreateToolbar(HWND hwnd)
             if (buttons[k].fsStyle & BTNS_SEP)
                 continue;
 
-            for (i = 0; i < _countof(g_id2ids); ++i)
-            {
-                if (g_id2ids[i].id == buttons[k].idCommand)
-                {
-                    INT ids = g_id2ids[i].ids;
-                    buttons[k].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(ids));
-                    break;
-                }
-            }
+            text = getCommandText(buttons[k].idCommand, FALSE);
+            buttons[k].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)text);
         }
     }
 
@@ -640,6 +681,13 @@ void OnRecent(HWND hwnd, INT index)
         doLoadFile(hwnd, psz);
 }
 
+void updateUI(HWND hwnd)
+{
+    // TODO: Update toolbar states
+    BOOL bCanUndo = Edit_CanUndo(g_hCanvasWnd);
+    SendMessage(g_hToolbar, TB_ENABLEBUTTON, ID_UNDO, bCanUndo);
+}
+
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
     static INT s_nBusyLock = 0;
@@ -699,17 +747,35 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_UNDO:
+        Edit_Undo(g_hCanvasWnd);
+        break;
     case ID_REDO:
+        ASSERTDX(!"Not implemented yet!");
+        break;
     case ID_CUT:
+        SendMessage(g_hCanvasWnd, WM_CUT, 0, 0);
+        break;
     case ID_COPY:
+        SendMessage(g_hCanvasWnd, WM_COPY, 0, 0);
+        break;
     case ID_PASTE:
+        SendMessage(g_hCanvasWnd, WM_PASTE, 0, 0);
+        break;
     case ID_DELETE:
+        SendMessage(g_hCanvasWnd, WM_CLEAR, 0, 0);
+        break;
     case ID_PRINTPREVIEW:
     case ID_PRINT:
     case ID_PROPERTIES:
     case ID_FIND:
     case ID_REPLACE:
     case ID_HELP:
+        ASSERTDX(!"Not implemented yet!");
+        break;
+    case ID_SELECTALL:
+        SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
+        break;
+    case ID_PAGESETUP:
         ASSERTDX(!"Not implemented yet!");
         break;
     case IDW_CANVAS:
@@ -730,6 +796,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
     if (s_nBusyLock == 0 && IsWindowVisible(g_hStatusBar))
     {
+        updateUI(hwnd);
         SendMessage(g_hStatusBar, SB_SETTEXT, 0 | 0, (LPARAM)LoadStringDx(IDS_READY));
     }
 }
@@ -867,6 +934,8 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         AppendMenu(hRecentMenu, MF_STRING | MF_GRAYED, 0, LoadStringDx(IDS_NONE));
     }
 
+    // TODO: Update menu states
+
     if (IsWindowVisible(g_hToolbar))
         CheckMenuItem(hMenu, ID_TOOLBAR, MF_CHECKED);
     else
@@ -876,11 +945,39 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         CheckMenuItem(hMenu, ID_STATUSBAR, MF_CHECKED);
     else
         CheckMenuItem(hMenu, ID_STATUSBAR, MF_UNCHECKED);
+
+    if (Edit_CanUndo(g_hCanvasWnd))
+        EnableMenuItem(hMenu, ID_UNDO, MF_ENABLED);
+    else
+        EnableMenuItem(hMenu, ID_UNDO, MF_GRAYED);
+}
+
+void OnMenuSelect(HWND hwnd, HMENU hmenu, int item, HMENU hmenuPopup, UINT flags)
+{
+    UINT pair[2];
+    WPARAM wParam = MAKEWPARAM(item, flags);
+    LPARAM lParam = (LPARAM)hmenu;
+    if (hmenu == NULL)
+    {
+        PostMessage(hwnd, WM_COMMAND, 0, 0);
+        PostMessage(hwnd, WM_SIZE, 0, 0);
+        return;
+    }
+    if (flags & MF_SYSMENU)
+    {
+        MenuHelp(WM_MENUSELECT, wParam, lParam, NULL, g_hInstance, g_hStatusBar, pair);
+        return;
+    }
+    {
+        LPTSTR text = getCommandText(item, TRUE);
+        SendMessage(g_hStatusBar, SB_SETTEXT, 0 | SBT_NOBORDERS, (LPARAM)text);
+    }
 }
 
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 {
     INT i, id;
+    LPTSTR text;
 
     if (!pnmhdr)
         return 0;
@@ -893,14 +990,12 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
             // TODO: set tooltip text for the command
             pTTT->hinst = g_hInstance;
             id = pTTT->hdr.idFrom;
-            for (size_t i = 0; i < _countof(g_id2ids); ++i)
+            text = getCommandText(id, FALSE);
+            if (text)
             {
-                if (id == g_id2ids[i].id)
-                {
-                    pTTT->lpszText = MAKEINTRESOURCE(g_id2ids[i].ids);
-                    break;
-                }
+                pTTT->lpszText = text;
             }
+            break;
         }
     }
 
@@ -925,6 +1020,7 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         HANDLE_MSG(hwnd, WM_MOVE, OnMove);
         HANDLE_MSG(hwnd, WM_SIZE, OnSize);
         HANDLE_MSG(hwnd, WM_INITMENU, OnInitMenu);
+        HANDLE_MSG(hwnd, WM_MENUSELECT, OnMenuSelect);
         HANDLE_MSG(hwnd, WM_CLOSE, OnClose);
         HANDLE_MSG(hwnd, WM_DESTROY, OnDestroy);
     default:
