@@ -205,24 +205,44 @@ INT ErrorBoxDx(HWND hwnd, LPCTSTR text)
     return MsgBoxDx(hwnd, text, NULL, MB_ICONERROR);
 }
 
+//#define USE_LOG_FILE
+
 void DebugPrintfA(const char *fmt, ...)
 {
+#ifdef USE_LOG_FILE
+    va_list va;
+    FILE *fp = fopen("log.txt", "a");
+    va_start(va, fmt);
+    vfprintf(fp, fmt, va);
+    fclose(fp);
+    va_end(va);
+#else
     char buf[MAX_PATH];
     va_list va;
     va_start(va, fmt);
     StringCchVPrintfA(buf, _countof(buf), fmt, va);
     OutputDebugStringA(buf);
     va_end(va);
+#endif
 }
 
 void DebugPrintfW(const wchar_t *fmt, ...)
 {
+#ifdef USE_LOG_FILE
+    va_list va;
+    FILE *fp = fopen("log.txt", "a");
+    va_start(va, fmt);
+    vfwprintf(fp, fmt, va);
+    fclose(fp);
+    va_end(va);
+#else
     wchar_t buf[MAX_PATH];
     va_list va;
     va_start(va, fmt);
     StringCchVPrintfW(buf, _countof(buf), fmt, va);
     OutputDebugStringW(buf);
     va_end(va);
+#endif
 }
 
 BOOL EnableProcessPrivilegeDx(LPCTSTR pszSE_)

@@ -53,6 +53,8 @@ static CommandUI g_CommandUI[] =
     { ID_SAVEAS, IDS_TOOL_SAVEAS },
     { ID_STATUSBAR, IDS_TOOL_STATUSBAR },
     { ID_TOOLBAR, IDS_TOOL_TOOLBAR },
+    { ID_EXIT, IDS_TOOL_EXIT },
+    { ID_ABOUT, IDS_TOOL_ABOUT },
     { ID_RECENT_01, IDS_TOOL_RECENT },
     { ID_RECENT_02, IDS_TOOL_RECENT },
     { ID_RECENT_03, IDS_TOOL_RECENT },
@@ -73,8 +75,6 @@ static CommandUI g_CommandUI[] =
     { ID_RECENT_18, IDS_TOOL_RECENT },
     { ID_RECENT_19, IDS_TOOL_RECENT },
     { ID_RECENT_20, IDS_TOOL_RECENT },
-    { ID_EXIT, IDS_TOOL_EXIT },
-    { ID_ABOUT, IDS_TOOL_ABOUT },
 };
 
 CommandUI *findCommand(INT id)
@@ -107,8 +107,11 @@ LPTSTR getCommandText(INT id, BOOL bDetail)
     return NULL;
 }
 
-void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
+void enableCommand(INT id, BOOL bEnabled, HMENU hMenu = NULL)
 {
+    if (!hMenu)
+        hMenu = GetMenu(g_hMainWnd);
+
     SendMessage(g_hToolbar, TB_ENABLEBUTTON, id, bEnabled);
 
     if (bEnabled)
@@ -117,8 +120,11 @@ void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
         EnableMenuItem(hMenu, id, MF_GRAYED);
 }
 
-void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
+void checkCommand(INT id, BOOL bChecked, HMENU hMenu = NULL)
 {
+    if (!hMenu)
+        hMenu = GetMenu(g_hMainWnd);
+
     SendMessage(g_hToolbar, TB_CHECKBUTTON, id, bChecked);
 
     if (bChecked)
@@ -129,13 +135,18 @@ void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 
 void updateCommandUI(HWND hwnd, HMENU hMenu)
 {
-    // TODO: Update states
-    if (!hMenu)
-        hMenu = GetMenu(g_hMainWnd);
+    // TODO: Update UI status
     checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
-    enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
+    enableCommand(ID_REDO, FALSE);
+    enableCommand(ID_PRINTPREVIEW, FALSE);
+    enableCommand(ID_PRINT, FALSE);
+    enableCommand(ID_PROPERTIES, FALSE);
+    enableCommand(ID_FIND, FALSE);
+    enableCommand(ID_REPLACE, FALSE);
+    enableCommand(ID_HELP, FALSE);
+    enableCommand(ID_PAGESETUP, FALSE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -974,26 +985,42 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
     updateCommandUI(hwnd, hMenu);
 }
 
-void OnMenuSelect(HWND hwnd, HMENU hmenu, int item, HMENU hmenuPopup, UINT flags)
+void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    UINT pair[2];
-    WPARAM wParam = MAKEWPARAM(item, flags);
-    LPARAM lParam = (LPARAM)hmenu;
-    if (hmenu == NULL)
+    UINT uItem = LOWORD(wParam), fuFlags = HIWORD(wParam);
+    HMENU hmenu = (HMENU)lParam;
+    LPTSTR text;
+    UINT dummy[2] = { 0 };
+
+    if (fuFlags & MF_POPUP)
+        uItem = GetMenuItemID(hmenu, uItem);
+
+    if (fuFlags & MF_SYSMENU)
     {
+        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
+        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
+        MenuHelp(WM_MENUSELECT, wParam, lParam, NULL, g_hInstance, g_hStatusBar, dummy);
+        return;
+    }
+
+    if (fuFlags == 0xFFFF && !hmenu)
+    {
+        SendMessage(g_hStatusBar, SB_SIMPLE, FALSE, 0);
         PostMessage(hwnd, WM_COMMAND, 0, 0);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         return;
     }
-    if (flags & MF_SYSMENU)
+
+    text = getCommandText(uItem, TRUE);
+    if (text)
     {
-        MenuHelp(WM_MENUSELECT, wParam, lParam, NULL, g_hInstance, g_hStatusBar, pair);
+        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)text);
+        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
         return;
     }
-    {
-        LPTSTR text = getCommandText(item, TRUE);
-        SendMessage(g_hStatusBar, SB_SETTEXT, 0 | SBT_NOBORDERS, (LPARAM)text);
-    }
+
+    SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
+    SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
 }
 
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
@@ -1042,9 +1069,11 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         HANDLE_MSG(hwnd, WM_MOVE, OnMove);
         HANDLE_MSG(hwnd, WM_SIZE, OnSize);
         HANDLE_MSG(hwnd, WM_INITMENU, OnInitMenu);
-        HANDLE_MSG(hwnd, WM_MENUSELECT, OnMenuSelect);
         HANDLE_MSG(hwnd, WM_CLOSE, OnClose);
         HANDLE_MSG(hwnd, WM_DESTROY, OnDestroy);
+    case WM_MENUSELECT:
+        OnMenuSelect(hwnd, wParam, lParam);
+        break;
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
