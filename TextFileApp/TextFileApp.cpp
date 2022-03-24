@@ -31,6 +31,7 @@ typedef struct CommandUI
 } CommandUI;
 
 // TODO: Add more entries...
+// NOTE: The resource string IDS_TOOL_... must be in form of "(command name)|(command description)".
 static CommandUI g_CommandUI[] =
 {
     { ID_NEW, IDS_TOOL_NEW },
