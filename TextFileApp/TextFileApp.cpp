@@ -21,14 +21,17 @@ BOOL        g_bFileModified   = FALSE; // Is file modified?
 TCHAR g_szFileName[MAX_PATH]  = TEXT(""); // The full pathname of the open file
 TCHAR g_szFileTitle[MAX_PATH] = TEXT(""); // The title name of the open file
 
+///////////////////////////////////////////////////////////////////////////////
+// COMMAND UI
+
 // a pair of command id and string id
-typedef struct ID2IDS
+typedef struct CommandUI
 {
     INT id, ids;
-} ID2IDS;
+} CommandUI;
 
 // TODO: Add more entries...
-static const ID2IDS g_id2ids[] =
+static CommandUI g_CommandUI[] =
 {
     { ID_NEW, IDS_TOOL_NEW },
     { ID_OPEN, IDS_TOOL_OPEN },
@@ -74,24 +77,65 @@ static const ID2IDS g_id2ids[] =
     { ID_ABOUT, IDS_TOOL_ABOUT },
 };
 
-LPTSTR getCommandText(INT id, BOOL bDescription)
+CommandUI *findCommand(INT id)
 {
-    for (size_t i = 0; i < _countof(g_id2ids); ++i)
+    for (size_t i = 0; i < _countof(g_CommandUI); ++i)
     {
-        if (id == g_id2ids[i].id)
+        if (id == g_CommandUI[i].id)
         {
-            LPTSTR text = LoadStringDx(g_id2ids[i].ids);
-            TCHAR *pch = _tcschr(text, TEXT('|'));
-            if (pch)
-            {
-                *pch = 0;
-                if (bDescription)
-                    return pch + 1;
-            }
-            return text;
+            return &g_CommandUI[i];
         }
     }
     return NULL;
+}
+
+LPTSTR getCommandText(INT id, BOOL bDetail)
+{
+    CommandUI *info = findCommand(id);
+    if (info)
+    {
+        LPTSTR text = LoadStringDx(info->ids);
+        TCHAR *pch = _tcschr(text, TEXT('|'));
+        if (pch)
+        {
+            *pch = 0;
+            if (bDetail)
+                return pch + 1;
+        }
+        return text;
+    }
+    return NULL;
+}
+
+void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
+{
+    SendMessage(g_hToolbar, TB_ENABLEBUTTON, id, bEnabled);
+
+    if (bEnabled)
+        EnableMenuItem(hMenu, id, MF_ENABLED);
+    else
+        EnableMenuItem(hMenu, id, MF_GRAYED);
+}
+
+void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
+{
+    SendMessage(g_hToolbar, TB_CHECKBUTTON, id, bChecked);
+
+    if (bChecked)
+        CheckMenuItem(hMenu, id, MF_CHECKED);
+    else
+        CheckMenuItem(hMenu, id, MF_UNCHECKED);
+}
+
+void updateCommandUI(HWND hwnd, HMENU hMenu)
+{
+    // TODO: Update states
+    if (!hMenu)
+        hMenu = GetMenu(g_hMainWnd);
+    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
+    checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
+    enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
+    enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -681,13 +725,6 @@ void OnRecent(HWND hwnd, INT index)
         doLoadFile(hwnd, psz);
 }
 
-void updateUI(HWND hwnd)
-{
-    // TODO: Update toolbar states
-    BOOL bCanUndo = Edit_CanUndo(g_hCanvasWnd);
-    SendMessage(g_hToolbar, TB_ENABLEBUTTON, ID_UNDO, bCanUndo);
-}
-
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
     static INT s_nBusyLock = 0;
@@ -796,7 +833,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
     if (s_nBusyLock == 0 && IsWindowVisible(g_hStatusBar))
     {
-        updateUI(hwnd);
+        updateCommandUI(hwnd, NULL);
         SendMessage(g_hStatusBar, SB_SETTEXT, 0 | 0, (LPARAM)LoadStringDx(IDS_READY));
     }
 }
@@ -934,22 +971,7 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         AppendMenu(hRecentMenu, MF_STRING | MF_GRAYED, 0, LoadStringDx(IDS_NONE));
     }
 
-    // TODO: Update menu states
-
-    if (IsWindowVisible(g_hToolbar))
-        CheckMenuItem(hMenu, ID_TOOLBAR, MF_CHECKED);
-    else
-        CheckMenuItem(hMenu, ID_TOOLBAR, MF_UNCHECKED);
-
-    if (IsWindowVisible(g_hStatusBar))
-        CheckMenuItem(hMenu, ID_STATUSBAR, MF_CHECKED);
-    else
-        CheckMenuItem(hMenu, ID_STATUSBAR, MF_UNCHECKED);
-
-    if (Edit_CanUndo(g_hCanvasWnd))
-        EnableMenuItem(hMenu, ID_UNDO, MF_ENABLED);
-    else
-        EnableMenuItem(hMenu, ID_UNDO, MF_GRAYED);
+    updateCommandUI(hwnd, hMenu);
 }
 
 void OnMenuSelect(HWND hwnd, HMENU hmenu, int item, HMENU hmenuPopup, UINT flags)

@@ -1,5 +1,10 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct RECENT;
 typedef struct RECENT *PRECENT;
 
@@ -13,3 +18,7 @@ void Recent_Add(PRECENT pRecent, LPCTSTR psz);
 void Recent_Remove(PRECENT pRecent, LPCTSTR psz);
 void Recent_Delete(PRECENT pRecent);
 void Recent_UnitTest();
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

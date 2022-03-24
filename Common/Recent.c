@@ -5,6 +5,11 @@
 #include <tchar.h>
 #include "Recent.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 typedef struct RECENT
 {
     INT nCapacity;
@@ -154,6 +159,10 @@ void Recent_UnitTest()
     Recent_Delete(pRecent);
     puts("OK");
 }
+
+#ifdef __cplusplus
+} // extern "C"
+#endif
 
 #ifdef UNITTEST
 int main(void)
