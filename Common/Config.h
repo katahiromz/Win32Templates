@@ -1,0 +1,2 @@
+#define DX_USE_LOG_FILE
+#define DX_USE_REGISTRY

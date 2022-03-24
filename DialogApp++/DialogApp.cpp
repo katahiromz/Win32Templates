@@ -84,8 +84,8 @@ WinMain(HINSTANCE   hInstance,
     // for detecting object leak (Windows only)
     {
         HANDLE hProcess = GetCurrentProcess();
-        DebugPrintfA("Count of GDI objects: %ld\n", GetGuiResources(hProcess, GR_GDIOBJECTS));
-        DebugPrintfA("Count of USER objects: %ld\n", GetGuiResources(hProcess, GR_USEROBJECTS));
+        TRACEA("Count of GDI objects: %ld\n", GetGuiResources(hProcess, GR_GDIOBJECTS));
+        TRACEA("Count of USER objects: %ld\n", GetGuiResources(hProcess, GR_USEROBJECTS));
     }
 #endif
 

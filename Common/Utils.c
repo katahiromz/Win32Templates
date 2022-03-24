@@ -205,11 +205,9 @@ INT ErrorBoxDx(HWND hwnd, LPCTSTR text)
     return MsgBoxDx(hwnd, text, NULL, MB_ICONERROR);
 }
 
-//#define USE_LOG_FILE
-
-void DebugPrintfA(const char *fmt, ...)
+void DebugPrintfDxA(const char *fmt, ...)
 {
-#ifdef USE_LOG_FILE
+#ifdef DX_USE_LOG_FILE
     va_list va;
     FILE *fp = fopen("log.txt", "a");
     va_start(va, fmt);
@@ -226,9 +224,9 @@ void DebugPrintfA(const char *fmt, ...)
 #endif
 }
 
-void DebugPrintfW(const wchar_t *fmt, ...)
+void DebugPrintfDxW(const wchar_t *fmt, ...)
 {
-#ifdef USE_LOG_FILE
+#ifdef DX_USE_LOG_FILE
     va_list va;
     FILE *fp = fopen("log.txt", "a");
     va_start(va, fmt);
@@ -396,7 +394,7 @@ void AssertDx(const char *text, const char *file, int line)
         "Click [Retry] to debug the application.\n"
         "Click [Ignore] to ignore this message.",
         file, line, text);
-    id = MessageBoxA(NULL, buf, "ASSERTDX", MB_ICONERROR | MB_ABORTRETRYIGNORE);
+    id = MessageBoxA(NULL, buf, "ASSERT", MB_ICONERROR | MB_ABORTRETRYIGNORE);
     switch (id)
     {
     case IDABORT:

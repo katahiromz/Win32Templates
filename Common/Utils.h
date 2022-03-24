@@ -20,29 +20,31 @@ LPWSTR GetWindowTextDxW(HWND hwnd);
 INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize);
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size);
 void AssertDx(const char *text, const char *file, int line);
+void DebugPrintfDxA(const char *fmt, ...);
+void DebugPrintfDxW(const wchar_t *fmt, ...);
 
 #ifdef NDEBUG
-    #define DebugPrintfA
-    #define DebugPrintfW
-    #define ASSERTDX(x)
-    #define VERIFYDX(x) do { \
+    #define TRACEA
+    #define TRACEW
+    #define ASSERT(x)
+    #define VERIFY(x) do { \
         if (!(x)) AssertDx(#x, __FILE__, __LINE__); \
     } while (0)
 #else
-    void DebugPrintfA(const char *fmt, ...);
-    void DebugPrintfW(const wchar_t *fmt, ...);
-    #define ASSERTDX(x) do { \
+    #define TRACEA DebugPrintfDxA
+    #define TRACEW DebugPrintfDxW
+    #define ASSERT(x) do { \
         if (!(x)) AssertDx(#x, __FILE__, __LINE__); \
     } while (0)
-    #define VERIFYDX ASSERTDX
+    #define VERIFY ASSERT
 #endif
 
 #ifdef UNICODE
-    #define DebugPrintf DebugPrintfW
+    #define TRACE TRACEW
     #define GetWindowTextDx GetWindowTextDxW
     #define GetDlgItemTextDx GetDlgItemTextDxW
 #else
-    #define DebugPrintf DebugPrintfA
+    #define TRACE TRACEA
     #define GetWindowTextDx GetWindowTextDxA
     #define GetDlgItemTextDx GetDlgItemTextDxA
 #endif

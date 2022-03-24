@@ -298,7 +298,7 @@ Quit:
     return ret;
 }
 
-void addRecent(LPCTSTR pszFile)
+void doAddToRecentFileList(LPCTSTR pszFile)
 {
     Recent_Add(g_settings.pRecent, pszFile);
 }
@@ -306,7 +306,7 @@ void addRecent(LPCTSTR pszFile)
 ///////////////////////////////////////////////////////////////////////////////
 // LOADING/SAVING FILES
 
-BOOL doSave(HWND hwnd);
+BOOL OnFileSave(HWND hwnd);
 
 void updateModified(BOOL bModified)
 {
@@ -331,7 +331,7 @@ void updateFileName(HWND hwnd, LPCTSTR pszFile)
     StringCchPrintf(szTitle, _countof(szTitle), LoadStringDx(IDS_TITLE), pchTitle);
     SetWindowText(hwnd, szTitle);
 
-    addRecent(g_szFileName);
+    doAddToRecentFileList(g_szFileName);
 }
 
 BOOL checkFileChange(HWND hwnd)
@@ -346,7 +346,7 @@ BOOL checkFileChange(HWND hwnd)
     switch (id)
     {   
     case IDYES:
-        if (doSave(hwnd))
+        if (OnFileSave(hwnd))
             return TRUE;
         break;
     case IDNO:
@@ -412,7 +412,7 @@ BOOL doSaveFile(HWND hwnd, LPCTSTR pszFile)
     return TRUE;
 }
 
-BOOL doNew(HWND hwnd)
+BOOL OnFileNew(HWND hwnd)
 {
     if (!checkFileChange(hwnd))
         return FALSE;
@@ -422,7 +422,7 @@ BOOL doNew(HWND hwnd)
     return TRUE;
 }
 
-BOOL doOpen(HWND hwnd)
+BOOL OnFileOpen(HWND hwnd)
 {
     TCHAR szFile[MAX_PATH] = TEXT("");
     OPENFILENAME ofn = { sizeof(ofn), hwnd };
@@ -443,7 +443,7 @@ BOOL doOpen(HWND hwnd)
     return FALSE;
 }
 
-BOOL doSaveAs(HWND hwnd)
+BOOL OnFileSaveAs(HWND hwnd)
 {
     TCHAR szFile[MAX_PATH] = TEXT("");
     OPENFILENAME ofn = { sizeof(ofn), hwnd };
@@ -464,12 +464,12 @@ BOOL doSaveAs(HWND hwnd)
     return FALSE;
 }
 
-BOOL doSave(HWND hwnd)
+BOOL OnFileSave(HWND hwnd)
 {
     if (g_szFileName[0])
         return doSaveFile(hwnd, g_szFileName);
     else
-        return doSaveAs(hwnd);
+        return OnFileSaveAs(hwnd);
 }
 
 BOOL doParseCommandLine(HWND hwnd, INT argc, LPTSTR *argv)
@@ -757,16 +757,16 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         doTest(hwnd);
         break;
     case ID_NEW:
-        doNew(hwnd);
+        OnFileNew(hwnd);
         break;
     case ID_OPEN:
-        doOpen(hwnd);
+        OnFileOpen(hwnd);
         break;
     case ID_SAVE:
-        doSave(hwnd);
+        OnFileSave(hwnd);
         break;
     case ID_SAVEAS:
-        doSaveAs(hwnd);
+        OnFileSaveAs(hwnd);
         break;
     case ID_STATUSBAR:
         if (IsWindowVisible(g_hStatusBar))
@@ -796,7 +796,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         Edit_Undo(g_hCanvasWnd);
         break;
     case ID_REDO:
-        ASSERTDX(!"Not implemented yet!");
+        ASSERT(!"Not implemented yet!");
         break;
     case ID_CUT:
         SendMessage(g_hCanvasWnd, WM_CUT, 0, 0);
@@ -816,13 +816,13 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
     case ID_FIND:
     case ID_REPLACE:
     case ID_HELP:
-        ASSERTDX(!"Not implemented yet!");
+        ASSERT(!"Not implemented yet!");
         break;
     case ID_SELECTALL:
         SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
         break;
     case ID_PAGESETUP:
-        ASSERTDX(!"Not implemented yet!");
+        ASSERT(!"Not implemented yet!");
         break;
     case IDW_CANVAS:
         if (codeNotify == EN_CHANGE)
@@ -1078,26 +1078,6 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-BOOL doInitApp(HINSTANCE hInstance, LPSTR lpCmdLine)
-{
-    WNDCLASSEX wcx = { sizeof(wcx), CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS };
-    wcx.lpfnWndProc = WindowProc;
-    wcx.hInstance = hInstance;
-    //wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    wcx.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN));
-    wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
-    //wcx.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    wcx.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);
-    wcx.lpszClassName = MAINWND_CLASSNAME;
-    wcx.hIconSm = NULL;
-    if (!RegisterClassEx(&wcx))
-    {
-        MessageBox(NULL, LoadStringDx(IDS_FAILREGCLASS), NULL, MB_ICONERROR);
-        return FALSE;
-    }
-    return TRUE;
-}
-
 BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
 {
     DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
@@ -1115,7 +1095,7 @@ BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
     RepositionWindowDx(hwnd);
 
     if (g_settings.bMaximized)
-        ShowWindow(hwnd, SW_MAXIMIZE);
+        ShowWindow(hwnd, SW_SHOWMAXIMIZED);
     else
         ShowWindow(hwnd, nCmdShow);
 
@@ -1124,9 +1104,55 @@ BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
     return TRUE;
 }
 
-INT doMainLoop(void)
+BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
+{
+    g_hInstance = hInstance;
+    InitCommonControls();
+
+    loadSettings(&g_settings);
+
+    // TODO: Register the window classes that the application uses
+    {
+        WNDCLASSEX wcx = { sizeof(wcx), CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS };
+        wcx.lpfnWndProc = WindowProc;
+        wcx.hInstance = hInstance;
+        //wcx.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+        wcx.hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MAIN));
+        wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
+        //wcx.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+        wcx.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);
+        wcx.lpszClassName = MAINWND_CLASSNAME;
+        wcx.hIconSm = NULL;
+        if (!RegisterClassEx(&wcx))
+        {
+            MessageBox(NULL, LoadStringDx(IDS_FAILREGCLASS), NULL, MB_ICONERROR);
+            return FALSE;
+        }
+    }
+
+    if (!doCreateMainWnd(hInstance, nCmdShow))
+        return -1;
+
+    return TRUE;
+}
+
+INT doExitInstance(INT ret)
+{
+    saveSettings(&g_settings);
+
+    if (g_settings.pRecent)
+    {
+        Recent_Delete(g_settings.pRecent);
+        g_settings.pRecent = NULL;
+    }
+
+    return ret;
+}
+
+INT doRun(void)
 {
     MSG msg;
+
     while (GetMessage(&msg, NULL, 0, 0))
     {
         if (g_hMainWnd && TranslateAccelerator(g_hMainWnd, g_hAccel, &msg))
@@ -1135,7 +1161,8 @@ INT doMainLoop(void)
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    return (INT)msg.wParam;
+
+    return doExitInstance((INT)msg.wParam);
 }
 
 INT WINAPI
@@ -1146,32 +1173,17 @@ WinMain(HINSTANCE   hInstance,
 {
     INT ret;
 
-    g_hInstance = hInstance;
-    InitCommonControls();
+    if (!doInitInstance(hInstance, lpCmdLine, nCmdShow))
+        return doExitInstance(-1);
 
-    loadSettings(&g_settings);
-
-    if (!doInitApp(hInstance, lpCmdLine))
-        return -1;
-    if (!doCreateMainWnd(hInstance, nCmdShow))
-        return -1;
-
-    ret = doMainLoop();
-
-    saveSettings(&g_settings);
-
-    if (g_settings.pRecent)
-    {
-        Recent_Delete(g_settings.pRecent);
-        g_settings.pRecent = NULL;
-    }
+    ret = doRun();
 
 #if (WINVER >= 0x0500) && !defined(NDEBUG) && 1
     // for detecting object leak (Windows only)
     {
         HANDLE hProcess = GetCurrentProcess();
-        DebugPrintfA("Count of GDI objects: %ld\n", GetGuiResources(hProcess, GR_GDIOBJECTS));
-        DebugPrintfA("Count of USER objects: %ld\n", GetGuiResources(hProcess, GR_USEROBJECTS));
+        TRACEA("Count of GDI objects: %ld\n", GetGuiResources(hProcess, GR_GDIOBJECTS));
+        TRACEA("Count of USER objects: %ld\n", GetGuiResources(hProcess, GR_USEROBJECTS));
     }
 #endif
 
