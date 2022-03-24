@@ -6,3 +6,4 @@ add_library(Common STATIC
     Shortcut.c
     Utils.c
 )
+#target_compile_definitions(Common PRIVATE -DUNICODE -D_UNICODE)

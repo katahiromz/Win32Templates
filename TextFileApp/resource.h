@@ -25,6 +25,9 @@
 #define IDS_BUSY                            110
 #define IDS_FILTER                          111
 #define IDS_NONE                            112
+#define IDS_TOOL_NEW                        113
+#define IDS_TOOL_OPEN                       114
+#define IDS_TOOL_SAVE                       115
 
 #define ID_EXIT                             100
 #define ID_ABOUT                            101

@@ -70,6 +70,8 @@ void LogOffDx(BOOL bForce);
 void PowerOffDx(BOOL bForce);
 void ShutDownDx(BOOL bForce);
 
+DWORD GetComCtl32VersionDx(VOID);
+
 #ifdef __cplusplus
 }
 #endif

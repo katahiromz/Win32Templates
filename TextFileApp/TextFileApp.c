@@ -369,41 +369,97 @@ BOOL doCreateToolbar(HWND hwnd)
 {
     DWORD style, exstyle;
     INT id;
+    BOOL bStandardButtons = TRUE; // TODO: Change
+    BOOL bAddString = TRUE; // TODO: Change
+    BOOL bList = TRUE; // TODO: Change
 
-    // TODO: Extend toolbar buttons
-    static const TBBUTTON buttons[] =
-    {
-        { 0, ID_NEW, TBSTATE_ENABLED, TBSTYLE_BUTTON },
-        { -1, -1, TBSTATE_ENABLED, TBSTYLE_SEP },
-        { 1, ID_OPEN, TBSTATE_ENABLED, TBSTYLE_BUTTON },
-        { 2, ID_SAVE, TBSTATE_ENABLED, TBSTYLE_BUTTON },
-    };
-    INT nButtonImageWidth = 32; // TODO: Change
-    INT nButtonImageHeight = 32; // TODO: Change
-    INT nButtonWidth = 36; // TODO: Change
-    INT nButtonHeight = 36; // TODO: Change
-    COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
-    g_himlToolbar = ImageList_LoadBitmap(g_hInstance, MAKEINTRESOURCE(IDB_TOOLBAR),
-                                         nButtonImageWidth, 0, rgbMaskColor);
-    if (!g_himlToolbar)
-        return FALSE;
-
-    style = WS_CHILD | TBS_HORZ | TBS_TOOLTIPS;
+    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
     if (g_settings.bShowToolbar)
         style |= WS_VISIBLE;
+    if (bList && bAddString)
+        style |= TBSTYLE_LIST;
     exstyle = 0;
     id = IDW_TOOLBAR;
     g_hToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
-                                style, 0, 0, 0, 0, hwnd,
-                                (HMENU)(INT_PTR)IDW_TOOLBAR, g_hInstance, NULL);
+                                style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
     if (!g_hToolbar)
         return FALSE;
 
     SendMessage(g_hToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SendMessage(g_hToolbar, TB_SETIMAGELIST, 0, (LPARAM)g_himlToolbar);
-    SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
-    SendMessage(g_hToolbar, TB_SETBUTTONSIZE, 0, MAKELPARAM(nButtonWidth, nButtonHeight));
-    SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+    SetWindowLongPtr(g_hToolbar, GWL_STYLE, GetWindowStyle(g_hToolbar) | TBSTYLE_FLAT);
+
+    // Enable multiple image lists
+    SendMessage(g_hToolbar, CCM_SETVERSION, 5, 0);
+
+    if (bStandardButtons)
+    {
+        // TODO: Change toolbar buttons
+        // You can use: STD_COPY, STD_PASTE, STD_CUT, STD_PRINT, STD_DELETE,
+        //              STD_PRINTPRE, STD_FILENEW, STD_PROPERTIES, STD_FILEOPEN,
+        //              STD_REDOW, STD_FILESAVE, STD_REPLACE, STD_FIND,
+        //              STD_UNDO, STD_HELP
+        static TBBUTTON buttons[] =
+        {
+            { STD_FILENEW, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+            { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+            { STD_FILEOPEN, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+            { STD_FILESAVE, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        };
+        {
+            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
+            //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
+            SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
+        }
+
+        if (bAddString)
+        {
+            // TODO: Add toolbar strings
+            buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
+            buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
+            buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+        }
+
+        SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+    }
+    else
+    {
+        // TODO: Change toolbar buttons
+        static TBBUTTON buttons[] =
+        {
+            { 0, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+            { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+            { 1, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+            { 2, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        };
+        INT nButtonImageWidth = 32; // TODO: Change
+        INT nButtonImageHeight = 32; // TODO: Change
+        INT idBitmap = IDB_TOOLBAR; // TODO: Change
+        COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
+
+        SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
+
+        if (bAddString)
+        {
+            // TODO: Add toolbar strings
+            buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
+            buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
+            buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+        }
+
+        g_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+                                            nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 0);
+        if (!g_himlToolbar)
+            return FALSE;
+
+        SendMessage(g_hToolbar, TB_SETIMAGELIST, 0, (LPARAM)g_himlToolbar);
+        SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+    }
+
+    {
+        DWORD extended = TBSTYLE_EX_DRAWDDARROWS | TBSTYLE_EX_MIXEDBUTTONS | TBSTYLE_EX_HIDECLIPPEDBUTTONS;
+        SendMessage(g_hToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
+    }
+
     return TRUE;
 }
 
@@ -454,7 +510,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
 #ifdef UNICODE
     {
         INT wargc;
-        LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargv);
+        LPWSTR *wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
         if (!doParseCommandLine(hwnd, wargc, wargv))
         {
             LocalFree(wargv);
@@ -747,6 +803,36 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         CheckMenuItem(hMenu, ID_STATUSBAR, MF_UNCHECKED);
 }
 
+LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
+{
+    if (!pnmhdr)
+        return 0;
+
+    switch (pnmhdr->code)
+    {
+    case TTN_NEEDTEXT:
+        {
+            TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pnmhdr;
+            // TODO: set tooltip text for the command
+            pTTT->hinst = g_hInstance;
+            switch (pTTT->hdr.idFrom)
+            {
+            case ID_NEW:
+                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_NEW);
+                return 0;
+            case ID_OPEN:
+                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_OPEN);
+                return 0;
+            case ID_SAVE:
+                pTTT->lpszText = MAKEINTRESOURCE(IDS_TOOL_SAVE);
+                return 0;
+            }
+        }
+    }
+
+    return 0;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // APPLICATION FRAMEWORK
 
@@ -759,6 +845,7 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         HANDLE_MSG(hwnd, WM_ACTIVATE, OnActivate);
         HANDLE_MSG(hwnd, WM_DROPFILES, OnDropFiles);
         HANDLE_MSG(hwnd, WM_COMMAND, OnCommand);
+        HANDLE_MSG(hwnd, WM_NOTIFY, OnNotify);
         HANDLE_MSG(hwnd, WM_ERASEBKGND, OnEraseBkgnd);
         HANDLE_MSG(hwnd, WM_PAINT, OnPaint);
         HANDLE_MSG(hwnd, WM_MOVE, OnMove);
@@ -839,6 +926,7 @@ WinMain(HINSTANCE   hInstance,
         INT         nCmdShow)
 {
     INT ret;
+
     g_hInstance = hInstance;
     InitCommonControls();
 

@@ -351,3 +351,14 @@ void ShutDownDx(BOOL bForce)
     EnableProcessPrivilegeDx(SE_SHUTDOWN_NAME);
     ExitWindowsEx(EWX_SHUTDOWN | (bForce ? EWX_FORCEIFHUNG : 0), 0);
 }
+
+DWORD GetComCtl32VersionDx(VOID)
+{
+    DLLGETVERSIONPROC fn;
+    DLLVERSIONINFO dvi = { sizeof(dvi) };
+    HMODULE hComCtl32 = GetModuleHandle(TEXT("comctl32"));
+    fn = (DLLGETVERSIONPROC)GetProcAddress(hComCtl32, "DllGetVersion");
+    if (!fn || FAILED(fn(&dvi)))
+        return 0;
+    return MAKELONG(dvi.dwMinorVersion, dvi.dwMajorVersion);
+}

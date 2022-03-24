@@ -96,6 +96,9 @@ STRINGTABLE
     IDS_BUSY, "Executing command..."
     IDS_FILTER, "Text files (*.txt)|*.txt|All files (*.*)|*.*|"
     IDS_NONE, "(None)"
+    IDS_TOOL_NEW, "New"
+    IDS_TOOL_OPEN, "Open"
+    IDS_TOOL_SAVE, "Save"
 }
 
 //////////////////////////////////////////////////////////////////////////////

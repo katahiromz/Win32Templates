@@ -9,6 +9,8 @@ project(Win32Templates C CXX RC)
 
 ##############################################################################
 
+add_definitions(-DUNICODE -D_UNICODE)
+
 add_subdirectory(Common)
 include_directories(Common)
 
