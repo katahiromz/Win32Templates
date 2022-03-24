@@ -21,6 +21,32 @@ BOOL        g_bFileModified   = FALSE; // Is file modified?
 TCHAR g_szFileName[MAX_PATH]  = TEXT(""); // The full pathname of the open file
 TCHAR g_szFileTitle[MAX_PATH] = TEXT(""); // The title name of the open file
 
+// a pair of command id and string id
+typedef struct ID2IDS
+{
+    INT id, ids;
+} ID2IDS;
+
+// TODO: Add more entries...
+static const ID2IDS g_id2ids[] =
+{
+    { ID_NEW, IDS_TOOL_NEW },
+    { ID_OPEN, IDS_TOOL_OPEN },
+    { ID_SAVE, IDS_TOOL_SAVE },
+    { ID_UNDO, IDS_TOOL_UNDO },
+    { ID_REDO, IDS_TOOL_REDO },
+    { ID_CUT, IDS_TOOL_CUT },
+    { ID_COPY, IDS_TOOL_COPY },
+    { ID_PASTE, IDS_TOOL_PASTE },
+    { ID_DELETE, IDS_TOOL_DELETE },
+    { ID_PRINTPREVIEW, IDS_TOOL_PRINTPREVIEW },
+    { ID_PRINT, IDS_TOOL_PRINT },
+    { ID_PROPERTIES, IDS_TOOL_PROPERTIES },
+    { ID_FIND, IDS_TOOL_FIND },
+    { ID_REPLACE, IDS_TOOL_REPLACE },
+    { ID_HELP, IDS_TOOL_HELP },
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // SETTINGS
 
@@ -364,17 +390,21 @@ BOOL doCreateToolbar(HWND hwnd)
 {
     DWORD style, exstyle;
     INT id;
-    BOOL bStandardButtons = FALSE; // TODO: Change
-    BOOL bAddString = TRUE; // TODO: Change
-    BOOL bList = FALSE; // TODO: Change
-    BOOL bUseLargeButtons = TRUE; // TODO: Change
-    // TODO: Change toolbar buttons
+    BOOL bStandardButtons = FALSE;  // TODO: Modify
+    BOOL bAddString = TRUE;         // TODO: Modify
+    BOOL bList = FALSE;             // TODO: Modify
+    BOOL bUseLargeButtons = TRUE;   // TODO: Modify
+    // TODO: Modify toolbar buttons
     static TBBUTTON buttons[] =
     {
+        // { image index, command id, button state, BTNS_, ... }
         { STD_FILENEW, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
         { STD_FILEOPEN, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { STD_FILESAVE, ID_SAVE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
+        { STD_PRINTPRE, ID_PRINTPREVIEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
+        { STD_PRINT, ID_PRINT, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
         { STD_UNDO, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { STD_REDOW, ID_REDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
@@ -389,12 +419,9 @@ BOOL doCreateToolbar(HWND hwnd)
         { STD_FIND, ID_FIND, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { STD_REPLACE, ID_REPLACE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
         { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
-        { STD_PRINTPRE, ID_PRINTPREVIEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-        { STD_PRINT, ID_PRINT, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
-        { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
         { STD_HELP, ID_HELP, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE | BTNS_SHOWTEXT },
     };
-    size_t i;
+    size_t i, k;
     for (i = 0; i < _countof(buttons); ++i)
     {
         buttons[i].iString = -1;
@@ -417,10 +444,21 @@ BOOL doCreateToolbar(HWND hwnd)
 
     if (bAddString)
     {
-        // TODO: Add toolbar strings
-        buttons[0].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_NEW));
-        buttons[2].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_OPEN));
-        buttons[3].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(IDS_TOOL_SAVE));
+        for (k = 0; k < _countof(buttons); ++k)
+        {
+            if (buttons[k].fsStyle & BTNS_SEP)
+                continue;
+
+            for (i = 0; i < _countof(g_id2ids); ++i)
+            {
+                if (g_id2ids[i].id == buttons[k].idCommand)
+                {
+                    INT ids = g_id2ids[i].ids;
+                    buttons[k].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)LoadStringDx(ids));
+                    break;
+                }
+            }
+        }
     }
 
     // Enable multiple image lists
@@ -443,8 +481,7 @@ BOOL doCreateToolbar(HWND hwnd)
     }
     else
     {
-        INT nButtonImageWidth, nButtonImageHeight;
-        INT idBitmap;
+        INT idBitmap, nButtonImageWidth, nButtonImageHeight;
         COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
 
         if (bUseLargeButtons)
@@ -469,6 +506,7 @@ BOOL doCreateToolbar(HWND hwnd)
         SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
 
+    // TODO: Set extended style
     {
         DWORD extended = 0;
         extended |= TBSTYLE_EX_DRAWDDARROWS;
@@ -840,32 +878,8 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         CheckMenuItem(hMenu, ID_STATUSBAR, MF_UNCHECKED);
 }
 
-typedef struct ID2IDS
-{
-    INT id;
-    INT ids;
-} ID2IDS;
-
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 {
-    static const ID2IDS id2ids[] =
-    {
-        { ID_NEW, IDS_TOOL_NEW },
-        { ID_OPEN, IDS_TOOL_OPEN },
-        { ID_SAVE, IDS_TOOL_SAVE },
-        { ID_UNDO, IDS_TOOL_UNDO },
-        { ID_REDO, IDS_TOOL_REDO },
-        { ID_CUT, IDS_TOOL_CUT },
-        { ID_COPY, IDS_TOOL_COPY },
-        { ID_PASTE, IDS_TOOL_PASTE },
-        { ID_DELETE, IDS_TOOL_DELETE },
-        { ID_PRINTPREVIEW, IDS_TOOL_PRINTPREVIEW },
-        { ID_PRINT, IDS_TOOL_PRINT },
-        { ID_PROPERTIES, IDS_TOOL_PROPERTIES },
-        { ID_FIND, IDS_TOOL_FIND },
-        { ID_REPLACE, IDS_TOOL_REPLACE },
-        { ID_HELP, IDS_TOOL_HELP }
-    };
     INT i, id;
 
     if (!pnmhdr)
@@ -879,11 +893,11 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
             // TODO: set tooltip text for the command
             pTTT->hinst = g_hInstance;
             id = pTTT->hdr.idFrom;
-            for (size_t i = 0; i < _countof(id2ids); ++i)
+            for (size_t i = 0; i < _countof(g_id2ids); ++i)
             {
-                if (id == id2ids[i].id)
+                if (id == g_id2ids[i].id)
                 {
-                    pTTT->lpszText = MAKEINTRESOURCE(id2ids[i].ids);
+                    pTTT->lpszText = MAKEINTRESOURCE(g_id2ids[i].ids);
                     break;
                 }
             }
