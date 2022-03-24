@@ -792,6 +792,12 @@ void OnClose(HWND hwnd)
 
 void OnDestroy(HWND hwnd)
 {
+    if (g_himlToolbar)
+    {
+        ImageList_Destroy(g_himlToolbar);
+        g_himlToolbar = NULL;
+    }
+
     PostQuitMessage(0);
 }
 
@@ -994,7 +1000,12 @@ WinMain(HINSTANCE   hInstance,
     ret = doMainLoop();
 
     saveSettings(&g_settings);
-    Recent_Delete(g_settings.pRecent);
+
+    if (g_settings.pRecent)
+    {
+        Recent_Delete(g_settings.pRecent);
+        g_settings.pRecent = NULL;
+    }
 
 #if (WINVER >= 0x0500) && !defined(NDEBUG) && 1
     // for detecting object leak (Windows only)
