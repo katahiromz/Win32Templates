@@ -162,6 +162,8 @@ BOOL doLoadFile(HWND hwnd, LPCTSTR pszFile)
     }
 
     SetWindowTextA(g_hCanvasWnd, (LPCSTR)pData);
+    free(pData);
+
     updateFileName(hwnd, pszFile);
     updateModified(FALSE);
     return TRUE;
@@ -180,6 +182,8 @@ BOOL doSaveFile(HWND hwnd, LPCTSTR pszFile)
     }
 
     err = WriteToFileDx(pszFile, psz, lstrlen(psz));
+    free(psz);
+
     if (err < 0)
     {
         ErrorBoxDx(hwnd, LoadStringDx(IDS_WRITEERROR));

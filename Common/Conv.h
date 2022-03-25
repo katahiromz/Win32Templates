@@ -8,18 +8,18 @@ extern "C"
 #define CP_JAPANESE 932 // Shift_JIS
 
 // nCodePage == CP_ACP, CP_UTF8, or CP_JAPANESE.
-LPWSTR WideFromAnsi(LPCSTR pszAnsi, UINT nCodePage OPTIONAL);
-LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage OPTIONAL);
+LPWSTR WideFromAnsi(LPCSTR pszAnsi, UINT nCodePage OPTIONAL); // free
+LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage OPTIONAL); // free
 #ifdef _WIN32
-    #define AnsiFromAnsi(text, nCodePage) _strdup(text)
-    #define WideFromWide(text, nCodePage) _wcsdup(text)
+    #define AnsiFromAnsi(text, nCodePage) _strdup(text) // free
+    #define WideFromWide(text, nCodePage) _wcsdup(text) // free
 #else
-    #define AnsiFromAnsi(text, nCodePage) strdup(text)
-    #define WideFromWide(text, nCodePage) wcsdup(text)
+    #define AnsiFromAnsi(text, nCodePage) strdup(text) // free
+    #define WideFromWide(text, nCodePage) wcsdup(text) // free
 #endif
 
-LPWSTR A2W(LPCSTR psz, UINT nCodePage OPTIONAL);
-LPSTR W2A(LPCWSTR psz, UINT nCodePage OPTIONAL);
+LPWSTR A2W(LPCSTR psz, UINT nCodePage OPTIONAL); // no free
+LPSTR W2A(LPCWSTR psz, UINT nCodePage OPTIONAL); // no free
 #define A2A(psz) psz
 #define W2W(psz) psz
 

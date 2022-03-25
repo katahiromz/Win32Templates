@@ -5,19 +5,19 @@ extern "C"
 {
 #endif
 
-LPTSTR LoadStringDx(INT nID);
-LONG RegMakeDx(HKEY hKey, LPCTSTR name, HKEY *phkeyResult);
+LPTSTR LoadStringDx(INT nID); // no free
+LONG RegMakeDx(HKEY hKey, LPCTSTR name, HKEY *phkeyResult); // RegCloseKey
 VOID CenterWindowDx(HWND hwnd);
 INT MsgBoxDx(HWND hwnd, LPCTSTR text, LPCTSTR title, UINT uType);
 INT ErrorBoxDx(HWND hwnd, LPCTSTR text);
 VOID RepositionWindowDx(HWND hwnd);
 BOOL EnableProcessPrivilegeDx(LPCTSTR pszSE_);
 LPTSTR MakeFilterDx(LPTSTR psz);
-LPSTR GetWindowTextDxA(HWND hwnd);
-LPWSTR GetWindowTextDxW(HWND hwnd);
-#define GetDlgItemTextDxA(hwnd, id) GetWindowTextDxA(GetDlgItem((hwnd), (id)))
-#define GetDlgItemTextDxW(hwnd, id) GetWindowTextDxW(GetDlgItem((hwnd), (id)))
-INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize);
+LPSTR GetWindowTextDxA(HWND hwnd); // free
+LPWSTR GetWindowTextDxW(HWND hwnd); // free
+#define GetDlgItemTextDxA(hwnd, id) GetWindowTextDxA(GetDlgItem((hwnd), (id))) // free
+#define GetDlgItemTextDxW(hwnd, id) GetWindowTextDxW(GetDlgItem((hwnd), (id))) // free
+INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize); // free
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size);
 void AssertDx(const char *text, const char *file, int line);
 void DebugPrintfDxA(const char *fmt, ...);
