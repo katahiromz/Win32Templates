@@ -281,6 +281,28 @@ LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage)
     return pszAnsi;
 }
 
+LPWSTR A2W(LPCSTR psz, UINT nCodePage)
+{
+    static WCHAR s_asz[4][DX_MAX_TEXTCONV_BUFF];
+    static INT s_i = 0;
+    INT i = s_i;
+    s_asz[i][0] = 0;
+    MultiByteToWideChar(nCodePage, 0, psz, -1, s_asz[i], DX_MAX_TEXTCONV_BUFF);
+    s_i = (s_i + 1) % _countof(s_asz);
+    return s_asz[i];
+}
+
+LPSTR W2A(LPCWSTR psz, UINT nCodePage)
+{
+    static CHAR s_asz[4][DX_MAX_TEXTCONV_BUFF];
+    static INT s_i = 0;
+    INT i = s_i;
+    s_asz[i][0] = 0;
+    WideCharToMultiByte(nCodePage, 0, psz, -1, s_asz[i], DX_MAX_TEXTCONV_BUFF, NULL, NULL);
+    s_i = (s_i + 1) % _countof(s_asz);
+    return s_asz[i];
+}
+
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size)
 {
     FILE *fout;
