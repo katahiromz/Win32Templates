@@ -3,13 +3,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBAL
 
-#define MAINWND_CLASSNAME   TEXT("WindowApp by katahiromz")
-
-// The window IDs
-#define IDW_CANVAS edt1
-#define IDW_TOOLBAR ctl1
-#define IDW_STATUSBAR stc1
-
 HINSTANCE   g_hInstance       = NULL; // module handle
 HWND        g_hMainWnd        = NULL; // main window
 HWND        g_hCanvasWnd      = NULL; // IDW_CANVAS
@@ -34,49 +27,20 @@ typedef struct CommandUI
 // NOTE: The resource string IDS_TOOL_... must be in form of "(command name)|(command description)".
 static CommandUI g_CommandUI[] =
 {
-    { ID_NEW, IDS_TOOL_NEW },
-    { ID_OPEN, IDS_TOOL_OPEN },
-    { ID_SAVE, IDS_TOOL_SAVE },
-    { ID_UNDO, IDS_TOOL_UNDO },
-    { ID_REDO, IDS_TOOL_REDO },
-    { ID_CUT, IDS_TOOL_CUT },
-    { ID_COPY, IDS_TOOL_COPY },
-    { ID_PASTE, IDS_TOOL_PASTE },
-    { ID_DELETE, IDS_TOOL_DELETE },
-    { ID_PRINTPREVIEW, IDS_TOOL_PRINTPREVIEW },
-    { ID_PRINT, IDS_TOOL_PRINT },
-    { ID_PROPERTIES, IDS_TOOL_PROPERTIES },
-    { ID_FIND, IDS_TOOL_FIND },
-    { ID_REPLACE, IDS_TOOL_REPLACE },
-    { ID_HELP, IDS_TOOL_HELP },
-    { ID_SELECTALL, IDS_TOOL_SELECTALL },
-    { ID_PAGESETUP, IDS_TOOL_PAGESETUP },
-    { ID_SAVEAS, IDS_TOOL_SAVEAS },
-    { ID_STATUSBAR, IDS_TOOL_STATUSBAR },
-    { ID_TOOLBAR, IDS_TOOL_TOOLBAR },
-    { ID_EXIT, IDS_TOOL_EXIT },
-    { ID_ABOUT, IDS_TOOL_ABOUT },
-    { ID_RECENT_01, IDS_TOOL_RECENT },
-    { ID_RECENT_02, IDS_TOOL_RECENT },
-    { ID_RECENT_03, IDS_TOOL_RECENT },
-    { ID_RECENT_04, IDS_TOOL_RECENT },
-    { ID_RECENT_05, IDS_TOOL_RECENT },
-    { ID_RECENT_06, IDS_TOOL_RECENT },
-    { ID_RECENT_07, IDS_TOOL_RECENT },
-    { ID_RECENT_08, IDS_TOOL_RECENT },
-    { ID_RECENT_09, IDS_TOOL_RECENT },
-    { ID_RECENT_10, IDS_TOOL_RECENT },
-    { ID_RECENT_11, IDS_TOOL_RECENT },
-    { ID_RECENT_12, IDS_TOOL_RECENT },
-    { ID_RECENT_13, IDS_TOOL_RECENT },
-    { ID_RECENT_14, IDS_TOOL_RECENT },
-    { ID_RECENT_15, IDS_TOOL_RECENT },
-    { ID_RECENT_16, IDS_TOOL_RECENT },
-    { ID_RECENT_17, IDS_TOOL_RECENT },
-    { ID_RECENT_18, IDS_TOOL_RECENT },
-    { ID_RECENT_19, IDS_TOOL_RECENT },
-    { ID_RECENT_20, IDS_TOOL_RECENT },
+#define DEFINE_COMMAND_UI(id, ids) { id, ids },
+#include "CommandUI.dat"
+#undef DEFINE_COMMAND_UI
 };
+
+void dumpCommandUI(void)
+{
+    TRACEA("---[CommandUI.tsv]---(FROM HERE)---\n");
+    TRACEA("%s\t%s\t%s\t%s\t%s\t%s\n", "(id)", "(id-dec)", "(id-hex)", "(ids)", "(ids-dec)", "(ids-hex)");
+#define DEFINE_COMMAND_UI(id, ids) TRACEA("%s\t%d\t0x%X\t%s\t%d\t0x%X\n", #id, id, id, #ids, ids, ids);
+#include "CommandUI.dat"
+#undef DEFINE_COMMAND_UI
+    TRACEA("---[CommandUI.tsv]---(DOWN TO HERE)---\n");
+}
 
 CommandUI *findCommand(INT id)
 {
@@ -128,7 +92,7 @@ void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
         CheckMenuItem(hMenu, id, MF_UNCHECKED);
 }
 
-void updateCommandUI(HWND hwnd, HMENU hMenu = NULL)
+void updateCommandUI(HWND hwnd, HMENU hMenu)
 {
     if (!hMenu)
         hMenu = GetMenu(g_hMainWnd);
@@ -148,13 +112,9 @@ void updateCommandUI(HWND hwnd, HMENU hMenu = NULL)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// SETTINGS
+// PROFILE
 
-#define COMPANY_NAME  TEXT("Katayama Hirofumi MZ")
-#define APP_NAME      TEXT("TextFileApp")
-#define MAX_RECENTS   20
-
-typedef struct SETTINGS
+typedef struct PROFILE
 {
     INT nWindowX;
     INT nWindowY;
@@ -164,143 +124,79 @@ typedef struct SETTINGS
     BOOL bShowStatusBar;
     BOOL bMaximized;
     PRECENT pRecent;
-} SETTINGS, *PSETTINGS;
+} PROFILE, *PPROFILE;
 
-SETTINGS g_settings;
+PROFILE g_profile;
 
-BOOL loadDword(HKEY hAppKey, LPCTSTR name, LPDWORD pdwValue)
+BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
 {
-    DWORD cbValue = sizeof(DWORD);
-    LONG error = RegQueryValueEx(hAppKey, name, NULL, NULL, (LPBYTE)pdwValue, &cbValue);
-    return !error;
-}
+    doSetRegistryKey(DX_APP_COMPANY_NAME_IN_ENGLISH);
 
-BOOL loadSz(HKEY hAppKey, LPCTSTR name, LPTSTR psz, DWORD cch, LPCTSTR pszDefValue)
-{
-    DWORD cbValue = (cch + 1) * sizeof(TCHAR);
-    LONG error = RegQueryValueEx(hAppKey, name, NULL, NULL, (LPBYTE)psz, &cbValue);
-    if (error)
-        StringCchCopy(psz, cch, pszDefValue);
-    return !error;
-}
-
-BOOL saveDword(HKEY hAppKey, LPCTSTR name, DWORD dwValue)
-{
-    DWORD cbValue = sizeof(dwValue);
-    LONG error = RegSetValueEx(hAppKey, name, 0, REG_DWORD, (LPBYTE)&dwValue, cbValue);
-    return !error;
-}
-
-BOOL saveSz(HKEY hAppKey, LPCTSTR name, LPCTSTR value)
-{
-    DWORD cbValue = (lstrlen(value) + 1) * sizeof(TCHAR);
-    LONG error = RegSetValueEx(hAppKey, name, 0, REG_SZ, (LPBYTE)value, cbValue);
-    return !error;
-}
-
-BOOL loadSettings(PSETTINGS pSettings)
-{
-    HKEY hAppKey = NULL;
-    TCHAR szName[MAX_PATH], szText[MAX_PATH];
-    INT i, nRecentCount;
-
-    // initial values
-    pSettings->nWindowX = CW_USEDEFAULT;
-    pSettings->nWindowY = CW_USEDEFAULT;
-    pSettings->nWindowCX = 600;
-    pSettings->nWindowCY = 400;
-    pSettings->bShowToolbar = TRUE;
-    pSettings->bShowStatusBar = TRUE;
-    pSettings->bMaximized = FALSE;
-    pSettings->pRecent = Recent_New(MAX_RECENTS);
-
-    RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\") COMPANY_NAME TEXT("\\") APP_NAME,
-                 0, KEY_READ, &hAppKey);
-    if (!hAppKey)
-        return FALSE;
-
-#define LOAD_DWORD(name, value) do { \
-    assert(sizeof(value) == sizeof(DWORD)); \
-    loadDword(hAppKey, TEXT(name), (LPDWORD)&value); \
+#define LOAD_INT(section, name, var, defvalue) do { \
+    (var) = loadProfileInt(TEXT(section), TEXT(name), defvalue); \
 } while (0)
-    LOAD_DWORD("WindowX", pSettings->nWindowX);
-    LOAD_DWORD("WindowY", pSettings->nWindowY);
-    LOAD_DWORD("WindowCX", pSettings->nWindowCX);
-    LOAD_DWORD("WindowCY", pSettings->nWindowCY);
-    LOAD_DWORD("ShowToolbar", pSettings->bShowToolbar);
-    LOAD_DWORD("ShowStatusBar", pSettings->bShowStatusBar);
-    LOAD_DWORD("Maximized", pSettings->bMaximized);
-    LOAD_DWORD("RecentCount", nRecentCount);
-#undef LOAD_DWORD
+    LOAD_INT("Settings", "WindowX", pProfile->nWindowX, CW_USEDEFAULT);
+    LOAD_INT("Settings", "WindowY", pProfile->nWindowY, CW_USEDEFAULT);
+    LOAD_INT("Settings", "WindowCX", pProfile->nWindowCX, 600);
+    LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
+    LOAD_INT("Settings", "ShowToolbar", pProfile->bShowToolbar, TRUE);
+    LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
+    LOAD_INT("Settings", "Maximized", pProfile->bMaximized, FALSE);
+#undef LOAD_INT
 
-    if (nRecentCount > MAX_RECENTS)
-        nRecentCount = MAX_RECENTS;
-
-    for (i = 0; i < nRecentCount; ++i)
     {
-        StringCchPrintf(szName, _countof(szName), TEXT("Recent%u"), i);
-        if (loadSz(hAppKey, szName, szText, _countof(szText), TEXT("")) && szText[0])
+        INT i;
+        LPTSTR psz;
+        TCHAR szName[64];
+        pProfile->pRecent = Recent_New(nMaxRecents);
+        for (i = 0; i < DX_APP_MAX_RECENTS; ++i)
         {
-            Recent_Add(pSettings->pRecent, szText);
-        }
-        else
-        {
-            break;
+            StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+            psz = loadProfileSz(TEXT("Recent File List"), szName, TEXT(""));
+            if (!psz || !psz[0])
+                break;
+
+            Recent_Add(pProfile->pRecent, psz);
         }
     }
 
-    RegCloseKey(hAppKey);
     return TRUE;
 }
 
-BOOL saveSettings(const SETTINGS *pSettings)
+BOOL saveProfile(const PROFILE *pProfile)
 {
-    HKEY hSoftwareKey = NULL, hCompanyKey = NULL, hAppKey = NULL;
-    BOOL ret = FALSE;
-    TCHAR szName[MAX_PATH];
-    INT i, nRecentCount = Recent_GetCount(pSettings->pRecent);
-
-    RegMakeDx(HKEY_CURRENT_USER, TEXT("Software"), &hSoftwareKey);
-    if (!hSoftwareKey)
-        goto Quit;
-    RegMakeDx(hSoftwareKey, COMPANY_NAME, &hCompanyKey);
-    if (!hCompanyKey)
-        goto Quit;
-    RegMakeDx(hCompanyKey, APP_NAME, &hAppKey);
-    if (!hAppKey)
-        goto Quit;
-
-#define SAVE_DWORD(name, value) do { \
-    saveDword(hAppKey, TEXT(name), (value)); \
+#define SAVE_INT(section, name, value) do { \
+    saveProfileInt(TEXT(section), TEXT(name), (value)); \
 } while (0)
-    SAVE_DWORD("WindowX", pSettings->nWindowX);
-    SAVE_DWORD("WindowY", pSettings->nWindowY);
-    SAVE_DWORD("WindowCX", pSettings->nWindowCX);
-    SAVE_DWORD("WindowCY", pSettings->nWindowCY);
-    SAVE_DWORD("ShowToolbar", pSettings->bShowToolbar);
-    SAVE_DWORD("ShowStatusBar", pSettings->bShowStatusBar);
-    SAVE_DWORD("Maximized", pSettings->bMaximized);
-    SAVE_DWORD("RecentCount", nRecentCount);
-#undef SAVE_DWORD
+    SAVE_INT("Settings", "WindowX", pProfile->nWindowX);
+    SAVE_INT("Settings", "WindowY", pProfile->nWindowY);
+    SAVE_INT("Settings", "WindowCX", pProfile->nWindowCX);
+    SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
+    SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
+    SAVE_INT("Settings", "ShowToolbar", pProfile->bShowToolbar);
+    SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
+#undef SAVE_INT
 
-    for (i = 0; i < nRecentCount; ++i)
     {
-        StringCchPrintf(szName, _countof(szName), TEXT("Recent%u"), i);
-        saveSz(hAppKey, szName, Recent_GetAt(pSettings->pRecent, i));
+        INT i, nRecentCount = Recent_GetCount(pProfile->pRecent);
+        TCHAR szName[64];
+
+        for (i = 0; i < nRecentCount; ++i)
+        {
+            StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+            saveProfileSz(TEXT("Recent File List"), szName, Recent_GetAt(pProfile->pRecent, i));
+        }
+
+        StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+        saveProfileSz(TEXT("Recent File List"), szName, NULL);
     }
 
-    ret = TRUE;
-
-Quit:
-    RegCloseKey(hAppKey);
-    RegCloseKey(hCompanyKey);
-    RegCloseKey(hSoftwareKey);
-    return ret;
+    return TRUE;
 }
 
 void doAddToRecentFileList(LPCTSTR pszFile)
 {
-    Recent_Add(g_settings.pRecent, pszFile);
+    Recent_Add(g_profile.pRecent, pszFile);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -529,7 +425,7 @@ BOOL doCreateToolbar(HWND hwnd)
     }
 
     style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
-    if (g_settings.bShowToolbar)
+    if (g_profile.bShowToolbar)
         style |= WS_VISIBLE;
     if (bList && bAddString)
         style |= TBSTYLE_LIST;
@@ -630,7 +526,7 @@ BOOL createControls(HWND hwnd)
         return FALSE;
 
     style = WS_CHILD | SBS_SIZEGRIP;
-    if (g_settings.bShowStatusBar)
+    if (g_profile.bShowStatusBar)
         style |= WS_VISIBLE;
     exstyle = 0;
     id = IDW_STATUSBAR;
@@ -723,13 +619,14 @@ aboutDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 BOOL doTest(HWND hwnd)
 {
     Recent_UnitTest();
+    dumpCommandUI();
     MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
     return TRUE;
 }
 
 void OnRecent(HWND hwnd, INT index)
 {
-    LPCTSTR psz = Recent_GetAt(g_settings.pRecent, index);
+    LPCTSTR psz = Recent_GetAt(g_profile.pRecent, index);
     if (psz)
         doLoadFile(hwnd, psz);
 }
@@ -777,7 +674,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         {
             ShowWindow(g_hStatusBar, SW_SHOWNOACTIVATE);
         }
-        g_settings.bShowStatusBar = IsWindowVisible(g_hStatusBar);
+        g_profile.bShowStatusBar = IsWindowVisible(g_hStatusBar);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_TOOLBAR:
@@ -789,7 +686,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         {
             ShowWindow(g_hToolbar, SW_SHOWNOACTIVATE);
         }
-        g_settings.bShowToolbar = IsWindowVisible(g_hToolbar);
+        g_profile.bShowToolbar = IsWindowVisible(g_hToolbar);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_UNDO:
@@ -886,8 +783,8 @@ void OnMove(HWND hwnd, int x, int y)
 
     if (g_hMainWnd && !IsIconic(hwnd) && !IsZoomed(hwnd))
     {
-        g_settings.nWindowX = rcWnd.left;
-        g_settings.nWindowY = rcWnd.top;
+        g_profile.nWindowX = rcWnd.left;
+        g_profile.nWindowY = rcWnd.top;
     }
 }
 
@@ -902,10 +799,10 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
     {
         if (!IsIconic(hwnd) && !IsZoomed(hwnd))
         {
-            g_settings.nWindowCX = rcWnd.right - rcWnd.left;
-            g_settings.nWindowCY = rcWnd.bottom - rcWnd.top;
+            g_profile.nWindowCX = rcWnd.right - rcWnd.left;
+            g_profile.nWindowCY = rcWnd.bottom - rcWnd.top;
         }
-        g_settings.bMaximized = IsZoomed(hwnd);
+        g_profile.bMaximized = IsZoomed(hwnd);
     }
 
     SendMessage(g_hToolbar, TB_AUTOSIZE, 0, 0);
@@ -954,7 +851,7 @@ void OnDestroy(HWND hwnd)
 
 void OnInitMenu(HWND hwnd, HMENU hMenu)
 {
-    INT i, nRecentCount = Recent_GetCount(g_settings.pRecent);
+    INT i, nRecentCount = Recent_GetCount(g_profile.pRecent);
     HMENU hFileMenu = GetSubMenu(GetMenu(hwnd), 0);
     INT nFileMenuCount = GetMenuItemCount(hFileMenu);
     HMENU hRecentMenu = GetSubMenu(hFileMenu, nFileMenuCount - 3);
@@ -966,7 +863,7 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
 
     for (i = 0; i < nRecentCount; ++i)
     {
-        pszRecent = Recent_GetAt(g_settings.pRecent, i);
+        pszRecent = Recent_GetAt(g_profile.pRecent, i);
         if (!pszRecent)
             continue;
 
@@ -975,7 +872,7 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
         AppendMenu(hRecentMenu, MF_STRING | MF_ENABLED, ID_RECENT_01 + i, szText);
     }
 
-    if (Recent_GetCount(g_settings.pRecent) == 0)
+    if (Recent_GetCount(g_profile.pRecent) == 0)
     {
         AppendMenu(hRecentMenu, MF_STRING | MF_GRAYED, 0, LoadStringDx(IDS_NONE));
     }
@@ -1082,9 +979,9 @@ BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
 {
     DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
     DWORD exstyle = 0;
-    INT x = g_settings.nWindowX, y = g_settings.nWindowY;
-    INT cx = g_settings.nWindowCX, cy = g_settings.nWindowCY;
-    HWND hwnd = CreateWindowEx(exstyle, MAINWND_CLASSNAME, LoadStringDx(IDS_APPNAME), style,
+    INT x = g_profile.nWindowX, y = g_profile.nWindowY;
+    INT cx = g_profile.nWindowCX, cy = g_profile.nWindowCY;
+    HWND hwnd = CreateWindowEx(exstyle, DX_APP_MAINWND_CLASSNAME, LoadStringDx(IDS_APPNAME), style,
                                x, y, cx, cy, NULL, NULL, hInstance, NULL);
     if (!hwnd)
     {
@@ -1094,7 +991,7 @@ BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
 
     RepositionWindowDx(hwnd);
 
-    if (g_settings.bMaximized)
+    if (g_profile.bMaximized)
         ShowWindow(hwnd, SW_SHOWMAXIMIZED);
     else
         ShowWindow(hwnd, nCmdShow);
@@ -1109,7 +1006,9 @@ BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
     g_hInstance = hInstance;
     InitCommonControls();
 
-    loadSettings(&g_settings);
+    doInitFramework();
+
+    loadProfile(&g_profile, DX_APP_MAX_RECENTS);
 
     // TODO: Register the window classes that the application uses
     {
@@ -1121,7 +1020,7 @@ BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
         wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
         //wcx.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
         wcx.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);
-        wcx.lpszClassName = MAINWND_CLASSNAME;
+        wcx.lpszClassName = DX_APP_MAINWND_CLASSNAME;
         wcx.hIconSm = NULL;
         if (!RegisterClassEx(&wcx))
         {
@@ -1138,14 +1037,15 @@ BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
 
 INT doExitInstance(INT ret)
 {
-    saveSettings(&g_settings);
+    saveProfile(&g_profile);
 
-    if (g_settings.pRecent)
+    if (g_profile.pRecent)
     {
-        Recent_Delete(g_settings.pRecent);
-        g_settings.pRecent = NULL;
+        Recent_Delete(g_profile.pRecent);
+        g_profile.pRecent = NULL;
     }
 
+    doFreeFramework();
     return ret;
 }
 

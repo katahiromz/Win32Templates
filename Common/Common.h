@@ -18,6 +18,7 @@
     #include <tchar.h>
     #include <strsafe.h>
     #include "Bitmap.h"
+    #include "Framework.h"
     #include "Recent.h"
     #include "Shortcut.h"
     #include "Utils.h"
