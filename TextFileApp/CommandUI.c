@@ -275,3 +275,41 @@ void destroyControls(HWND hwnd)
         s_himlToolbar = NULL;
     }
 }
+
+void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam)
+{
+    UINT uItem = LOWORD(wParam), fuFlags = HIWORD(wParam);
+    HMENU hmenu = (HMENU)lParam;
+    LPTSTR text;
+    UINT dummy[2] = { 0 };
+
+    if (fuFlags & MF_POPUP)
+        uItem = GetMenuItemID(hmenu, uItem);
+
+    if (fuFlags & MF_SYSMENU)
+    {
+        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
+        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
+        MenuHelp(WM_MENUSELECT, wParam, lParam, NULL, g_hInstance, g_hStatusBar, dummy);
+        return;
+    }
+
+    if (fuFlags == 0xFFFF && !hmenu)
+    {
+        SendMessage(g_hStatusBar, SB_SIMPLE, FALSE, 0);
+        PostMessage(hwnd, WM_COMMAND, 0, 0);
+        PostMessage(hwnd, WM_SIZE, 0, 0);
+        return;
+    }
+
+    text = getCommandText(uItem, TRUE);
+    if (text)
+    {
+        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)text);
+        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
+        return;
+    }
+
+    SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
+    SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
+}

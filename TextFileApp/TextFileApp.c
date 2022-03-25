@@ -14,15 +14,16 @@ TCHAR g_szFileName[MAX_PATH]  = TEXT(""); // The full pathname of the open file
 TCHAR g_szFileTitle[MAX_PATH] = TEXT(""); // The title name of the open file
 
 // CommandUI.c
-extern void dumpCommandUI(void);
-extern LPTSTR getCommandText(INT id, BOOL bDetail);
-extern void updateCommandUI(HWND hwnd, HMENU hMenu);
+void dumpCommandUI(void);
+LPTSTR getCommandText(INT id, BOOL bDetail);
+void updateCommandUI(HWND hwnd, HMENU hMenu);
 BOOL registerControls(HINSTANCE hInst);
-extern BOOL createControls(HWND hwnd);
-extern void destroyControls(HWND hwnd);
+BOOL createControls(HWND hwnd);
+void destroyControls(HWND hwnd);
+void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam);
 
 // AboutDlg.c
-extern void doAboutDlg(HWND hwnd);
+void doAboutDlg(HWND hwnd);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PROFILE
@@ -590,66 +591,24 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
     updateCommandUI(hwnd, hMenu);
 }
 
-void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam)
-{
-    UINT uItem = LOWORD(wParam), fuFlags = HIWORD(wParam);
-    HMENU hmenu = (HMENU)lParam;
-    LPTSTR text;
-    UINT dummy[2] = { 0 };
-
-    if (fuFlags & MF_POPUP)
-        uItem = GetMenuItemID(hmenu, uItem);
-
-    if (fuFlags & MF_SYSMENU)
-    {
-        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
-        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
-        MenuHelp(WM_MENUSELECT, wParam, lParam, NULL, g_hInstance, g_hStatusBar, dummy);
-        return;
-    }
-
-    if (fuFlags == 0xFFFF && !hmenu)
-    {
-        SendMessage(g_hStatusBar, SB_SIMPLE, FALSE, 0);
-        PostMessage(hwnd, WM_COMMAND, 0, 0);
-        PostMessage(hwnd, WM_SIZE, 0, 0);
-        return;
-    }
-
-    text = getCommandText(uItem, TRUE);
-    if (text)
-    {
-        SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)text);
-        SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
-        return;
-    }
-
-    SendMessage(g_hStatusBar, SB_SETTEXT, 255 | SBT_NOBORDERS, (LPARAM)TEXT(""));
-    SendMessage(g_hStatusBar, SB_SIMPLE, TRUE, 0);
-}
-
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 {
-    INT i, id;
-    LPTSTR text;
-
-    if (!pnmhdr)
-        return 0;
+    ASSERT(pnmhdr);
 
     switch (pnmhdr->code)
     {
     case TTN_NEEDTEXT:
         {
             TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pnmhdr;
+            LPTSTR text;
+
             // TODO: set tooltip text for the command
             pTTT->hinst = g_hInstance;
-            id = pTTT->hdr.idFrom;
-            text = getCommandText(id, FALSE);
+            text = getCommandText(idFrom, FALSE);
             if (text)
             {
                 pTTT->lpszText = text;
             }
-            break;
         }
     }
 
