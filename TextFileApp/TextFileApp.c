@@ -56,7 +56,6 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
 #undef LOAD_INT
 
     pProfile->pRecent = loadRecentFileList(nMaxRecents, NULL);
-
     return TRUE;
 }
 
@@ -69,9 +68,9 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowY", pProfile->nWindowY);
     SAVE_INT("Settings", "WindowCX", pProfile->nWindowCX);
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
-    SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
     SAVE_INT("Settings", "ShowToolbar", pProfile->bShowToolbar);
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
+    SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
 #undef SAVE_INT
 
     saveRecentFileList(pProfile->pRecent, NULL);
