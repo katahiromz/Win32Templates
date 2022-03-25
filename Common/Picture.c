@@ -35,7 +35,7 @@ HBITMAP LoadPictureFromFileDx(LPCTSTR pszFileName)
 
     if (CreateStreamOnHGlobal(hMem, TRUE, &pifStream) == S_OK)
     {
-        OleLoadPicture(pifStream, GlobalSize(hMem), FALSE, &IID_IPicture, (LPVOID*)&pifPic);
+        OleLoadPicture(pifStream, (LONG)GlobalSize(hMem), FALSE, &IID_IPicture, (LPVOID*)&pifPic);
         pifStream->lpVtbl->Release(pifStream);
     }
 
@@ -46,7 +46,7 @@ HBITMAP LoadPictureFromFileDx(LPCTSTR pszFileName)
 
         pifPic->lpVtbl->get_Handle(pifPic, &hOle);
 
-        if (GetObject((HANDLE)hOle, sizeof(BITMAP), &bm))
+        if (GetObject((HANDLE)(UINT_PTR)hOle, sizeof(BITMAP), &bm))
         {
             HDC hDC = CreateCompatibleDC(NULL);
             if (hDC)
@@ -76,4 +76,5 @@ Quit:
     if (hMem)
         GlobalFree(hMem);
     CloseHandle(hFile);
+    return hbm;
 }

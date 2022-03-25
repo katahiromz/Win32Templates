@@ -10,7 +10,7 @@ LPTSTR LoadStringDx(INT nID)
 {
     static TCHAR s_szText[3][DX_MAX_LOADSTRING];
     static size_t s_i = 0;
-    INT i = s_i;
+    size_t i = s_i;
     s_szText[i][0] = 0;
     LoadString(NULL, nID, s_szText[i], _countof(s_szText[i]));
     s_i = (s_i + 1) % _countof(s_szText);

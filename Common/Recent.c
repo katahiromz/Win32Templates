@@ -55,7 +55,7 @@ void Recent_Print(PRECENT pRecent)
     printf("---: %d\n", pRecent->nCount);
     for (i = 0; i < pRecent->nCapacity; ++i)
     {
-        printf("[%d]: %s\n", i, pRecent->ppsz[i]);
+        printf("[%d]: %ls\n", i, pRecent->ppsz[i]);
     }
 }
 

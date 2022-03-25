@@ -123,7 +123,7 @@ BOOL doCreateToolbar(HWND hwnd)
     BOOL bStandardButtons = FALSE;  // TODO: Modify
     BOOL bAddString = TRUE;         // TODO: Modify
     BOOL bList = FALSE;             // TODO: Modify
-    BOOL bUseLargeButtons = TRUE;   // TODO: Modify
+    BOOL bUseLargeButtons = FALSE;  // TODO: Modify
     // TODO: Modify toolbar buttons
     static TBBUTTON buttons[] =
     {
@@ -208,7 +208,9 @@ BOOL doCreateToolbar(HWND hwnd)
     else // non-standard
     {
         INT idBitmap, nButtonImageWidth, nButtonImageHeight;
-        COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
+        // TODO: Change
+        //COLORREF rgbMaskColor = RGB(255, 0, 255);
+        COLORREF rgbMaskColor = CLR_NONE;
 
         if (bUseLargeButtons)
         {
@@ -224,7 +226,8 @@ BOOL doCreateToolbar(HWND hwnd)
         SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
         s_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                            nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 0);
+                                            nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
+                                            LR_CREATEDIBSECTION);
         if (!s_himlToolbar)
             return FALSE;
 

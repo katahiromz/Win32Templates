@@ -290,7 +290,6 @@ BOOL saveProfileSz(LPCTSTR pszSection, LPCTSTR pszEntry, LPCTSTR pszValue)
             {
                 DWORD cbValue = (lstrlen(pszValue) + 1) * sizeof(TCHAR);
                 error = RegSetValueEx(hSectionKey, pszEntry, 0, REG_SZ, (LPBYTE)pszValue, cbValue);
-                RegCloseKey(hSectionKey);
             }
 
             RegCloseKey(hSectionKey);
@@ -311,7 +310,6 @@ BOOL saveProfileBinary(LPCTSTR pszSection, LPCTSTR pszEntry, LPCVOID pData, DWOR
     if (g_pszRegistryKey)
     {
         LONG error;
-        DWORD dwType, cbValue;
         HKEY hSectionKey = doGetSectionKey(pszSection);
         if (!hSectionKey)
             return FALSE;
