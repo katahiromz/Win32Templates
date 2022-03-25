@@ -14,102 +14,13 @@ BOOL        g_bFileModified   = FALSE; // Is file modified?
 TCHAR g_szFileName[MAX_PATH]  = TEXT(""); // The full pathname of the open file
 TCHAR g_szFileTitle[MAX_PATH] = TEXT(""); // The title name of the open file
 
-///////////////////////////////////////////////////////////////////////////////
-// COMMAND UI
+// CommandUI.c
+extern void dumpCommandUI(void);
+extern LPTSTR getCommandText(INT id, BOOL bDetail);
+extern void updateCommandUI(HWND hwnd, HMENU hMenu);
 
-// a pair of command id and string id
-typedef struct CommandUI
-{
-    INT id, ids;
-} CommandUI;
-
-// TODO: Add more entries...
-// NOTE: The resource string IDS_TOOL_... must be in form of "(command name)|(command description)".
-static CommandUI g_CommandUI[] =
-{
-#define DEFINE_COMMAND_UI(id, ids) { id, ids },
-#include "CommandUI.dat"
-#undef DEFINE_COMMAND_UI
-};
-
-void dumpCommandUI(void)
-{
-    TRACEA("---[CommandUI.tsv]---(FROM HERE)---\n");
-    TRACEA("%s\t%s\t%s\t%s\t%s\t%s\n", "(id)", "(id-dec)", "(id-hex)", "(ids)", "(ids-dec)", "(ids-hex)");
-#define DEFINE_COMMAND_UI(id, ids) TRACEA("%s\t%d\t0x%X\t%s\t%d\t0x%X\n", #id, id, id, #ids, ids, ids);
-#include "CommandUI.dat"
-#undef DEFINE_COMMAND_UI
-    TRACEA("---[CommandUI.tsv]---(DOWN TO HERE)---\n");
-}
-
-CommandUI *findCommand(INT id)
-{
-    for (size_t i = 0; i < _countof(g_CommandUI); ++i)
-    {
-        if (id == g_CommandUI[i].id)
-        {
-            return &g_CommandUI[i];
-        }
-    }
-    return NULL;
-}
-
-LPTSTR getCommandText(INT id, BOOL bDetail)
-{
-    CommandUI *info = findCommand(id);
-    if (info)
-    {
-        LPTSTR text = LoadStringDx(info->ids);
-        TCHAR *pch = _tcschr(text, TEXT('|'));
-        if (pch)
-        {
-            *pch = 0;
-            if (bDetail)
-                return pch + 1;
-        }
-        return text;
-    }
-    return NULL;
-}
-
-void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
-{
-    SendMessage(g_hToolbar, TB_ENABLEBUTTON, id, bEnabled);
-
-    if (bEnabled)
-        EnableMenuItem(hMenu, id, MF_ENABLED);
-    else
-        EnableMenuItem(hMenu, id, MF_GRAYED);
-}
-
-void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
-{
-    SendMessage(g_hToolbar, TB_CHECKBUTTON, id, bChecked);
-
-    if (bChecked)
-        CheckMenuItem(hMenu, id, MF_CHECKED);
-    else
-        CheckMenuItem(hMenu, id, MF_UNCHECKED);
-}
-
-void updateCommandUI(HWND hwnd, HMENU hMenu)
-{
-    if (!hMenu)
-        hMenu = GetMenu(g_hMainWnd);
-
-    // TODO: Update UI status
-    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
-    checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
-    enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
-    enableCommand(ID_REDO, FALSE, hMenu);
-    enableCommand(ID_PRINTPREVIEW, FALSE, hMenu);
-    enableCommand(ID_PRINT, FALSE, hMenu);
-    enableCommand(ID_PROPERTIES, FALSE, hMenu);
-    enableCommand(ID_FIND, FALSE, hMenu);
-    enableCommand(ID_REPLACE, FALSE, hMenu);
-    enableCommand(ID_HELP, FALSE, hMenu);
-    enableCommand(ID_PAGESETUP, FALSE, hMenu);
-}
+// AboutDlg.c
+extern void doAboutDlg(HWND hwnd);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PROFILE
@@ -564,33 +475,6 @@ void OnDropFiles(HWND hwnd, HDROP hdrop)
     DragFinish(hdrop);
 }
 
-BOOL about_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
-{
-    CenterWindowDx(hwnd);
-    return TRUE;
-}
-
-void about_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
-{
-    switch (id)
-    {
-    case IDOK:
-    case IDCANCEL:
-        EndDialog(hwnd, id);
-        break;
-    }
-}
-
-INT_PTR CALLBACK
-aboutDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-    switch (uMsg)
-    {
-        HANDLE_MSG(hwnd, WM_INITDIALOG, about_OnInitDialog);
-        HANDLE_MSG(hwnd, WM_COMMAND, about_OnCommand);
-    }
-    return 0;
-}
 
 BOOL doTest(HWND hwnd)
 {
@@ -624,7 +508,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         PostMessage(hwnd, WM_CLOSE, 0, 0);
         break;
     case ID_ABOUT:
-        DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_ABOUT), hwnd, aboutDialogProc);
+        doAboutDlg(hwnd);
         break;
     case ID_TEST:
         doTest(hwnd);
@@ -977,7 +861,7 @@ BOOL doCreateMainWnd(HINSTANCE hInstance, INT nCmdShow)
     return TRUE;
 }
 
-BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
+BOOL doInitApp(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
 {
     g_hInstance = hInstance;
     InitCommonControls();
@@ -1011,7 +895,7 @@ BOOL doInitInstance(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
     return TRUE;
 }
 
-INT doExitInstance(INT ret)
+INT doExitApp(INT ret)
 {
     saveProfile(&g_profile);
 
@@ -1038,7 +922,7 @@ INT doRun(void)
         DispatchMessage(&msg);
     }
 
-    return doExitInstance((INT)msg.wParam);
+    return doExitApp((INT)msg.wParam);
 }
 
 INT WINAPI
@@ -1049,8 +933,8 @@ WinMain(HINSTANCE   hInstance,
 {
     INT ret;
 
-    if (!doInitInstance(hInstance, lpCmdLine, nCmdShow))
-        return doExitInstance(-1);
+    if (!doInitApp(hInstance, lpCmdLine, nCmdShow))
+        return doExitApp(-1);
 
     ret = doRun();
 
