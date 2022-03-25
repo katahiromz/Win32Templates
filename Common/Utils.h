@@ -22,6 +22,7 @@ INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size);
 void AssertDx(const char *text, const char *file, int line);
 void DebugPrintfDxA(const char *fmt, ...);
 void DebugPrintfDxW(const wchar_t *fmt, ...);
+void HexDumpDx(const void *ptr, size_t size, size_t top_addr OPTIONAL);
 
 #ifdef NDEBUG
     #define TRACEA

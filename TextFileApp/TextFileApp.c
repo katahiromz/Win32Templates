@@ -334,6 +334,7 @@ BOOL doTest(HWND hwnd)
 {
     Recent_UnitTest();
     dumpCommandUI();
+    HexDumpDx(g_hInstance, 343, (size_t)g_hInstance);
     MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
     return TRUE;
 }

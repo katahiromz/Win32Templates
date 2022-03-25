@@ -1,5 +1,6 @@
 #include "Common.h"
 #include <sys/stat.h>
+#include <ctype.h>
 
 //#define DX_USE_LOG_FILE
 
@@ -394,4 +395,75 @@ void AssertDx(const char *text, const char *file, int line)
     case IDIGNORE:
         break;
     }
+}
+
+void HexDumpDx(const void *ptr, size_t size, size_t top_addr)
+{
+    const BYTE *pb = ptr;
+    size_t ib, column, work, addr;
+    static INT s_i = 0;
+
+    ++s_i;
+
+    TRACEA("---[HexDump-%d.txt]---(FROM HERE)---\n", s_i);
+
+    if (!ptr)
+    {
+        TRACEA("(null)\n");
+        goto Quit;
+    }
+
+    if (!size)
+    {
+        TRACEA("(Empty)\n");
+        goto Quit;
+    }
+
+#ifdef _WIN64
+    TRACEA("_ADDRESS:_ADDRESS");
+#else
+    TRACEA("_ADDRESS");
+#endif
+    TRACEA("  +0 +1 +2 +3 +4 +5 +6 +7  +8 +9 +A +B +C +D +E +F  0123456789ABCDEF\n");
+    for (ib = 0; ib < size; ib += 16)
+    {
+        addr = top_addr + ib;
+#ifdef _WIN64
+        TRACEA("%08X:%08X ", (DWORD)addr, (DWORD)(addr >> 32));
+#else
+        TRACEA("%08X ", addr);
+#endif
+        if (ib + 16 > size)
+            work = size - ib;
+        else
+            work = 16;
+
+        for (column = 0; column < 16; ++column)
+        {
+            if (work < column)
+                TRACEA("   ");
+            else
+                TRACEA(" %02X", pb[ib + column]);
+            if (column == 7)
+                TRACEA(" ");
+        }
+
+        TRACEA("  ");
+        for (column = 0; column < 16; ++column)
+        {
+            if (work < column)
+                TRACEA(" ");
+            else if (isprint(pb[ib + column]))
+                TRACEA("%c", pb[ib + column]);
+            else
+                TRACEA(".");
+        }
+
+        TRACEA("\n");
+    }
+
+    TRACEA("Total: %zu bytes (0x%zX)\n", size, size);
+
+Quit:
+    TRACEA("---[HexDump-%d.txt]---(DOWN TO HERE)---\n", s_i);
 }
