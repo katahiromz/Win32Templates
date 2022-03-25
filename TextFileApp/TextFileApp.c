@@ -130,6 +130,9 @@ PROFILE g_profile;
 
 BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
 {
+#ifndef DX_APP_COMPANY_NAME_IN_ENGLISH
+    #define DX_APP_COMPANY_NAME_IN_ENGLISH DX_COMPANY_NAME_IN_ENGLISH
+#endif
     doSetRegistryKey(DX_APP_COMPANY_NAME_IN_ENGLISH);
 
 #define LOAD_INT(section, name, var, defvalue) do { \
@@ -144,21 +147,7 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "Maximized", pProfile->bMaximized, FALSE);
 #undef LOAD_INT
 
-    {
-        INT i;
-        LPTSTR psz;
-        TCHAR szName[64];
-        pProfile->pRecent = Recent_New(nMaxRecents);
-        for (i = 0; i < DX_APP_MAX_RECENTS; ++i)
-        {
-            StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
-            psz = loadProfileSz(TEXT("Recent File List"), szName, TEXT(""));
-            if (!psz || !psz[0])
-                break;
-
-            Recent_Add(pProfile->pRecent, psz);
-        }
-    }
+    pProfile->pRecent = loadRecentFileList(nMaxRecents, NULL);
 
     return TRUE;
 }
@@ -177,20 +166,7 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
 #undef SAVE_INT
 
-    {
-        INT i, nRecentCount = Recent_GetCount(pProfile->pRecent);
-        TCHAR szName[64];
-
-        for (i = 0; i < nRecentCount; ++i)
-        {
-            StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
-            saveProfileSz(TEXT("Recent File List"), szName, Recent_GetAt(pProfile->pRecent, i));
-        }
-
-        StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
-        saveProfileSz(TEXT("Recent File List"), szName, NULL);
-    }
-
+    saveRecentFileList(pProfile->pRecent, NULL);
     return TRUE;
 }
 

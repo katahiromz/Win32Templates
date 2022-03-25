@@ -1,5 +1,12 @@
 #pragma once
 
+#include "Recent.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 extern HINSTANCE g_hInstance;
 extern HWND g_hMainWnd;
 extern LPTSTR g_pszExeName;
@@ -19,8 +26,14 @@ HKEY doGetSectionKey(LPCTSTR pszSection);
 BOOL    loadProfileInt(LPCTSTR pszSection, LPCTSTR pszEntry, INT nDefault);
 LPTSTR  loadProfileSz(LPCTSTR pszSection, LPCTSTR pszEntry, LPCTSTR pszDefault);
 BOOL    loadProfileBinary(LPCTSTR pszSection, LPCTSTR pszEntry, LPBYTE* ppData, LPDWORD pBytes);
+PRECENT loadRecentFileList(INT nMaxRecents, LPCTSTR pszSectionName OPTIONAL);
 BOOL saveProfileInt(LPCTSTR pszSection, LPCTSTR pszEntry, INT nValue);
 BOOL saveProfileSz(LPCTSTR pszSection, LPCTSTR pszEntry, LPCTSTR pszValue);
 BOOL saveProfileBinary(LPCTSTR pszSection, LPCTSTR pszEntry, LPCVOID pData, DWORD nBytes);
+BOOL saveRecentFileList(PRECENT pRecent, LPCTSTR pszSectionName OPTIONAL);
 
 #define doDelRegTree RegDeleteTree
+
+#ifdef __cplusplus
+} // extern "C"
+#endif

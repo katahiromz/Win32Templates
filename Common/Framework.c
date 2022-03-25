@@ -347,3 +347,49 @@ BOOL saveProfileBinary(LPCTSTR pszSection, LPCTSTR pszEntry, LPCVOID pData, DWOR
         }
     }
 }
+
+PRECENT loadRecentFileList(INT nMaxRecents, LPCTSTR pszSectionName OPTIONAL)
+{
+    INT i;
+    LPTSTR psz;
+    TCHAR szName[64];
+    PRECENT pRecent;
+
+    if (pszSectionName == NULL)
+        pszSectionName = TEXT("Recent File List");
+
+    pRecent = Recent_New(nMaxRecents);
+    if (!pRecent)
+        return NULL;
+
+    for (i = 0; i < nMaxRecents; ++i)
+    {
+        StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+        psz = loadProfileSz(pszSectionName, szName, TEXT(""));
+        if (!psz || !psz[0])
+            break;
+
+        Recent_Add(pRecent, psz);
+    }
+
+    return pRecent;
+}
+
+BOOL saveRecentFileList(PRECENT pRecent, LPCTSTR pszSectionName OPTIONAL)
+{
+    INT i, nRecentCount = Recent_GetCount(pRecent);
+    TCHAR szName[64];
+
+    if (pszSectionName == NULL)
+        pszSectionName = TEXT("Recent File List");
+
+    for (i = 0; i < nRecentCount; ++i)
+    {
+        StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+        saveProfileSz(TEXT("Recent File List"), szName, Recent_GetAt(pRecent, i));
+    }
+
+    StringCchPrintf(szName, _countof(szName), TEXT("File%u"), i + 1);
+    saveProfileSz(TEXT("Recent File List"), szName, NULL);
+    return TRUE;
+}
