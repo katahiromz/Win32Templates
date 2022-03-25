@@ -87,14 +87,18 @@ static void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
         CheckMenuItem(hMenu, id, MF_UNCHECKED);
 }
 
+static void hideCommand(INT id, HMENU hMenu)
+{
+    SendMessage(g_hToolbar, TB_HIDEBUTTON, id, TRUE);
+    DeleteMenu(hMenu, id, MF_BYCOMMAND);
+}
+
 void updateCommandUI(HWND hwnd, HMENU hMenu)
 {
     if (!hMenu)
         hMenu = GetMenu(g_hMainWnd);
 
-    // TODO: Update UI status by using enableCommand and checkCommand
-    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
-    checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
+    // TODO: Update UI status
     enableCommand(ID_UNDO, Edit_CanUndo(g_hCanvasWnd), hMenu);
     enableCommand(ID_REDO, FALSE, hMenu);
     enableCommand(ID_PRINTPREVIEW, FALSE, hMenu);
@@ -104,6 +108,9 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     enableCommand(ID_REPLACE, FALSE, hMenu);
     enableCommand(ID_HELP, FALSE, hMenu);
     enableCommand(ID_PAGESETUP, FALSE, hMenu);
+    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
+    checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
+    hideCommand(ID_REDO, hMenu);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
