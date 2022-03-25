@@ -5,7 +5,7 @@ extern HWND g_hCanvasWnd;
 extern HWND g_hToolbar;
 extern HWND g_hStatusBar;
 
-HIMAGELIST  g_himlToolbar     = NULL; // image list for toolbar
+static HIMAGELIST s_himlToolbar = NULL; // image list for toolbar
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMAND UI
@@ -210,12 +210,12 @@ BOOL doCreateToolbar(HWND hwnd)
 
         SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
-        g_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+        s_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
                                             nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 0);
-        if (!g_himlToolbar)
+        if (!s_himlToolbar)
             return FALSE;
 
-        SendMessage(g_hToolbar, TB_SETIMAGELIST, 0, (LPARAM)g_himlToolbar);
+        SendMessage(g_hToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar);
         SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
 
@@ -228,6 +228,11 @@ BOOL doCreateToolbar(HWND hwnd)
         SendMessage(g_hToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
     }
 
+    return TRUE;
+}
+
+BOOL registerControls(HINSTANCE hInst)
+{
     return TRUE;
 }
 
@@ -264,9 +269,9 @@ void destroyControls(HWND hwnd)
     DestroyWindow(g_hToolbar);
     DestroyWindow(g_hStatusBar);
 
-    if (g_himlToolbar)
+    if (s_himlToolbar)
     {
-        ImageList_Destroy(g_himlToolbar);
-        g_himlToolbar = NULL;
+        ImageList_Destroy(s_himlToolbar);
+        s_himlToolbar = NULL;
     }
 }

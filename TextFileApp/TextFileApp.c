@@ -17,6 +17,7 @@ TCHAR g_szFileTitle[MAX_PATH] = TEXT(""); // The title name of the open file
 extern void dumpCommandUI(void);
 extern LPTSTR getCommandText(INT id, BOOL bDetail);
 extern void updateCommandUI(HWND hwnd, HMENU hMenu);
+BOOL registerControls(HINSTANCE hInst);
 extern BOOL createControls(HWND hwnd);
 extern void destroyControls(HWND hwnd);
 
@@ -683,7 +684,7 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-BOOL doCreateMainWnd(HINSTANCE hInst, INT nCmdShow)
+BOOL createMainWnd(HINSTANCE hInst, INT nCmdShow)
 {
     DWORD style = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN;
     DWORD exstyle = 0;
@@ -709,7 +710,7 @@ BOOL doCreateMainWnd(HINSTANCE hInst, INT nCmdShow)
     return TRUE;
 }
 
-BOOL doRegisterClasses(HINSTANCE hInst)
+BOOL registerClasses(HINSTANCE hInst)
 {
     // TODO: Register the window classes that the application uses
     WNDCLASSEX wcx = { sizeof(wcx), CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS };
@@ -719,6 +720,7 @@ BOOL doRegisterClasses(HINSTANCE hInst)
     wcx.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_MAIN));
     wcx.hCursor = LoadCursor(NULL, IDC_ARROW);
     //wcx.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
+    //wcx.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
     wcx.lpszMenuName = MAKEINTRESOURCE(IDR_MAINMENU);
     wcx.lpszClassName = DX_APP_MAINWND_CLASSNAME;
     wcx.hIconSm = NULL;
@@ -727,7 +729,8 @@ BOOL doRegisterClasses(HINSTANCE hInst)
         MessageBox(NULL, LoadStringDx(IDS_FAILREGCLASS), NULL, MB_ICONERROR);
         return FALSE;
     }
-    return TRUE;
+
+    return registerControls(hInst);
 }
 
 BOOL doInitApp(HINSTANCE hInst, LPSTR lpCmdLine, INT nCmdShow)
@@ -739,10 +742,10 @@ BOOL doInitApp(HINSTANCE hInst, LPSTR lpCmdLine, INT nCmdShow)
 
     loadProfile(&g_profile, DX_APP_MAX_RECENTS);
 
-    if (!doRegisterClasses(hInst))
+    if (!registerClasses(hInst))
         return FALSE;
 
-    if (!doCreateMainWnd(hInst, nCmdShow))
+    if (!createMainWnd(hInst, nCmdShow))
         return FALSE;
 
     if (!doParseCommandLine())

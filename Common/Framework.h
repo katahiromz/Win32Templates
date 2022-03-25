@@ -6,7 +6,6 @@
 
 //#define DX_HELPFILE TEXT("README.txt")
 //#define DX_HELPFILE TEXT("README.htm")
-
 #define DX_HELPFILE_DOTEXT TEXT(".TXT")
 
 #ifdef __cplusplus
@@ -22,7 +21,7 @@ extern LPTSTR g_pszRegistryKey;
 extern LPTSTR g_pszProfileName;
 extern LPTSTR g_pszHelpName;
 
-void doInitFramework(void);
+void doInitFramework(void); // doFreeFramework
 void doSetRegistryKey(LPCTSTR pszKey);
 void doFreeFramework(void);
 
@@ -30,6 +29,7 @@ HKEY doGetAppRegistryKey(void);
 HKEY doGetSectionKey(LPCTSTR pszSection);
 
 #define DX_PROFILE_VALUE_MAX 512
+
 BOOL    loadProfileInt(LPCTSTR pszSection, LPCTSTR pszEntry, INT nDefault);
 LPTSTR  loadProfileSz(LPCTSTR pszSection, LPCTSTR pszEntry, LPCTSTR pszDefault);
 BOOL    loadProfileBinary(LPCTSTR pszSection, LPCTSTR pszEntry, LPBYTE* ppData, LPDWORD pBytes);
