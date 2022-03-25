@@ -52,14 +52,14 @@ void DebugPrintfDxW(const wchar_t *fmt, ...);
 #define CP_JAPANESE 932 // Shift_JIS
 
 // nCodePage == CP_ACP, CP_UTF8, or CP_JAPANESE.
-LPWSTR WideFromAnsi(UINT nCodePage, LPCSTR pszAnsi);
-LPSTR AnsiFromWide(UINT nCodePage, LPCWSTR pszWide);
+LPWSTR WideFromAnsi(LPCSTR pszAnsi, UINT nCodePage OPTIONAL);
+LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage OPTIONAL);
 #ifdef _WIN32
-    #define AnsiFromAnsi(nCodePage, text) _strdup(text)
-    #define WideFromWide(nCodePage, text) _wcsdup(text)
+    #define AnsiFromAnsi(text, nCodePage) _strdup(text)
+    #define WideFromWide(text, nCodePage) _wcsdup(text)
 #else
-    #define AnsiFromAnsi(nCodePage, text) strdup(text)
-    #define WideFromWide(nCodePage, text) wcsdup(text)
+    #define AnsiFromAnsi(text, nCodePage) strdup(text)
+    #define WideFromWide(text, nCodePage) wcsdup(text)
 #endif
 
 #ifdef UNICODE

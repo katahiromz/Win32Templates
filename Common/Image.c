@@ -9,7 +9,7 @@
 HBITMAP LoadImageFromFileDx(LPCTSTR pszFileName)
 {
     HBITMAP hbm = NULL;
-    LPWSTR pszWideFileName = WideFromText(CP_ACP, pszFileName);
+    LPWSTR pszWideFileName = WideFromText(pszFileName, CP_ACP);
 #ifdef __cplusplus
     using namespace Gdiplus;
     {
@@ -52,7 +52,7 @@ HBITMAP LoadImageFromFileDx(LPCTSTR pszFileName)
 BOOL SaveImageToFileDx(LPCTSTR pszFileName, HBITMAP hbm)
 {
     BOOL ret = FALSE;
-    LPWSTR pszWideFileName = WideFromText(CP_ACP, pszFileName);
+    LPWSTR pszWideFileName = WideFromText(pszFileName, CP_ACP);
     LPWSTR pchDotExt = PathFindExtensionW(pszWideFileName);
     CLSID clsid;
     if (lstrcmpiW(pchDotExt, L".bmp") == 0)

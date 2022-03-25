@@ -265,7 +265,7 @@ BOOL EnableProcessPrivilegeDx(LPCTSTR pszSE_)
     return f;
 }
 
-LPWSTR WideFromAnsi(UINT nCodePage, LPCSTR pszAnsi)
+LPWSTR WideFromAnsi(LPCSTR pszAnsi, UINT nCodePage)
 {
     INT cchWide = MultiByteToWideChar(nCodePage, 0, pszAnsi, -1, NULL, 0);
     LPWSTR pszWide = (LPWSTR)calloc(cchWide, sizeof(WCHAR));
@@ -273,7 +273,7 @@ LPWSTR WideFromAnsi(UINT nCodePage, LPCSTR pszAnsi)
     return pszWide;
 }
 
-LPSTR AnsiFromWide(UINT nCodePage, LPCWSTR pszWide)
+LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage)
 {
     INT cchAnsi = WideCharToMultiByte(nCodePage, 0, pszWide, -1, NULL, 0, NULL, NULL);
     LPSTR pszAnsi = (LPSTR)calloc(cchAnsi, sizeof(char));
