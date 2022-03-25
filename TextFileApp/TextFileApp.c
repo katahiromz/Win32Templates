@@ -174,14 +174,14 @@ BOOL doSaveFile(HWND hwnd, LPCTSTR pszFile)
     LPTSTR psz;
     INT err;
 
-    psz = GetWindowTextDx(g_hCanvasWnd);
+    psz = GetWindowTextDxA(g_hCanvasWnd);
     if (!psz)
     {
         ErrorBoxDx(hwnd, LoadStringDx(IDS_WRITEERROR));
         return FALSE;
     }
 
-    err = WriteToFileDx(pszFile, psz, lstrlen(psz));
+    err = WriteToFileDx(pszFile, psz, lstrlenA(psz));
     free(psz);
 
     if (err < 0)
