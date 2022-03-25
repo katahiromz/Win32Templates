@@ -4,6 +4,7 @@ add_library(Common STATIC
     Bitmap.c
     Framework.c
     Image.c
+    Picture.c
     Recent.c
     Shortcut.c
     Utils.c
