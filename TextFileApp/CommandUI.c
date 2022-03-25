@@ -146,11 +146,14 @@ BOOL doCreateToolbar(HWND hwnd)
     };
     size_t i, k;
     LPTSTR text;
+
+    // TODO:
     for (i = 0; i < _countof(buttons); ++i)
     {
         buttons[i].iString = -1;
     }
 
+    // TODO: Create g_hToolbar
     style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
     if (bList && bAddString)
         style |= TBSTYLE_LIST;
@@ -161,6 +164,7 @@ BOOL doCreateToolbar(HWND hwnd)
     if (!g_hToolbar)
         return FALSE;
 
+    // TODO: Initialize toolbar
     SendMessage(g_hToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
     SetWindowLongPtr(g_hToolbar, GWL_STYLE, GetWindowStyle(g_hToolbar) | TBSTYLE_FLAT);
 
@@ -179,7 +183,7 @@ BOOL doCreateToolbar(HWND hwnd)
     // Enable multiple image lists
     SendMessage(g_hToolbar, CCM_SETVERSION, 5, 0);
 
-    if (bStandardButtons)
+    if (bStandardButtons) // standard buttons
     {
         if (bUseLargeButtons)
         {
@@ -194,7 +198,7 @@ BOOL doCreateToolbar(HWND hwnd)
 
         SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
-    else
+    else // non-standard
     {
         INT idBitmap, nButtonImageWidth, nButtonImageHeight;
         COLORREF rgbMaskColor = RGB(255, 0, 255); // TODO: Change
@@ -235,6 +239,7 @@ BOOL doCreateToolbar(HWND hwnd)
 
 BOOL registerControls(HINSTANCE hInst)
 {
+    // TODO:
     return TRUE;
 }
 
@@ -253,6 +258,7 @@ BOOL createControls(HWND hwnd)
             return FALSE;
     }
 
+    // TODO: Create canvas window
     style = WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | WS_HSCROLL | WS_VSCROLL;
     exstyle = WS_EX_CLIENTEDGE;
     id = IDW_CANVAS;
@@ -268,6 +274,7 @@ BOOL createControls(HWND hwnd)
     if (!doCreateToolbar(hwnd))
         return FALSE;
 
+    // TODO: Create the status bar
     style = WS_CHILD | SBS_SIZEGRIP;
     exstyle = 0;
     id = IDW_STATUSBAR;
