@@ -499,6 +499,7 @@ void OnMove(HWND hwnd, int x, int y)
 
     if (g_hMainWnd && !IsIconic(hwnd) && !IsZoomed(hwnd))
     {
+        // TODO: Save the position of the main window
         g_profile.nWindowX = rcWnd.left;
         g_profile.nWindowY = rcWnd.top;
     }
@@ -513,6 +514,7 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
 
     if (g_hMainWnd)
     {
+        // TODO: Save the main window size
         if (!IsIconic(hwnd) && !IsZoomed(hwnd))
         {
             g_profile.nWindowCX = rcWnd.right - rcWnd.left;
@@ -536,6 +538,7 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
         INT an[2];
         GetWindowRect(g_hStatusBar, &rcStatus);
 
+        // TODO: Set the status bar parts
         an[0] = rcStatus.right - rcStatus.left - 100;
         an[1] = -1;
         SendMessage(g_hStatusBar, SB_SETPARTS, 2, (LPARAM)an);
