@@ -1,9 +1,13 @@
 #include "Common.h"
 #include <sys/stat.h>
 
+//#define DX_USE_LOG_FILE
+
+#define DX_MAX_LOADSTRING MAX_PATH
+
 LPTSTR LoadStringDx(INT nID)
 {
-    static TCHAR s_szText[3][MAX_PATH];
+    static TCHAR s_szText[3][DX_MAX_LOADSTRING];
     static size_t s_i = 0;
     INT i = s_i;
     s_szText[i][0] = 0;
@@ -263,44 +267,6 @@ BOOL EnableProcessPrivilegeDx(LPCTSTR pszSE_)
     }
 
     return f;
-}
-
-LPWSTR WideFromAnsi(LPCSTR pszAnsi, UINT nCodePage)
-{
-    INT cchWide = MultiByteToWideChar(nCodePage, 0, pszAnsi, -1, NULL, 0);
-    LPWSTR pszWide = (LPWSTR)calloc(cchWide, sizeof(WCHAR));
-    MultiByteToWideChar(nCodePage, 0, pszAnsi, -1, pszWide, cchWide);
-    return pszWide;
-}
-
-LPSTR AnsiFromWide(LPCWSTR pszWide, UINT nCodePage)
-{
-    INT cchAnsi = WideCharToMultiByte(nCodePage, 0, pszWide, -1, NULL, 0, NULL, NULL);
-    LPSTR pszAnsi = (LPSTR)calloc(cchAnsi, sizeof(char));
-    WideCharToMultiByte(nCodePage, 0, pszWide, -1, pszAnsi, cchAnsi, NULL, NULL);
-    return pszAnsi;
-}
-
-LPWSTR A2W(LPCSTR psz, UINT nCodePage)
-{
-    static WCHAR s_asz[4][DX_MAX_TEXTCONV_BUFF];
-    static INT s_i = 0;
-    INT i = s_i;
-    s_asz[i][0] = 0;
-    MultiByteToWideChar(nCodePage, 0, psz, -1, s_asz[i], DX_MAX_TEXTCONV_BUFF);
-    s_i = (s_i + 1) % _countof(s_asz);
-    return s_asz[i];
-}
-
-LPSTR W2A(LPCWSTR psz, UINT nCodePage)
-{
-    static CHAR s_asz[4][DX_MAX_TEXTCONV_BUFF];
-    static INT s_i = 0;
-    INT i = s_i;
-    s_asz[i][0] = 0;
-    WideCharToMultiByte(nCodePage, 0, psz, -1, s_asz[i], DX_MAX_TEXTCONV_BUFF, NULL, NULL);
-    s_i = (s_i + 1) % _countof(s_asz);
-    return s_asz[i];
 }
 
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size)

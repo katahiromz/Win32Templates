@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Config.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,6 +17,7 @@
     #include <tchar.h>
     #include <strsafe.h>
     #include "Bitmap.h"
+    #include "Conv.h"
     #include "Framework.h"
     #include "Image.h"
     #include "Recent.h"

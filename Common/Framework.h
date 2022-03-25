@@ -2,6 +2,13 @@
 
 #include "Recent.h"
 
+#define DX_COMPANY_NAME_IN_ENGLISH TEXT("Katayama Hirofumi MZ")
+
+//#define DX_HELPFILE TEXT("README.txt")
+//#define DX_HELPFILE TEXT("README.htm")
+
+#define DX_HELPFILE_DOTEXT TEXT(".TXT")
+
 #ifdef __cplusplus
 extern "C"
 {
