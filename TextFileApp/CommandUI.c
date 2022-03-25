@@ -5,7 +5,7 @@ extern HWND g_hCanvasWnd;
 extern HWND g_hToolbar;
 extern HWND g_hStatusBar;
 
-static HFONT g_hCanvasFont = NULL;
+static HFONT s_hCanvasFont = NULL;
 
 static HIMAGELIST s_himlToolbar = NULL; // image list for toolbar
 
@@ -261,8 +261,8 @@ BOOL createControls(HWND hwnd)
         LOGFONT lf = { 24 };
         lf.lfCharSet = DEFAULT_CHARSET;
         lf.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
-        g_hCanvasFont = CreateFontIndirect(&lf);
-        if (!g_hCanvasFont)
+        s_hCanvasFont = CreateFontIndirect(&lf);
+        if (!s_hCanvasFont)
             return FALSE;
     }
 
@@ -277,7 +277,7 @@ BOOL createControls(HWND hwnd)
 
     // TODO: Set canvas font
     //SetWindowFont(g_hCanvasWnd, GetStockFont(DEFAULT_GUI_FONT), TRUE);
-    SetWindowFont(g_hCanvasWnd, g_hCanvasFont, TRUE);
+    SetWindowFont(g_hCanvasWnd, s_hCanvasFont, TRUE);
 
     if (!doCreateToolbar(hwnd))
         return FALSE;
@@ -304,13 +304,14 @@ void destroyControls(HWND hwnd)
         ImageList_Destroy(s_himlToolbar);
         s_himlToolbar = NULL;
     }
-    if (g_hCanvasFont)
+    if (s_hCanvasFont)
     {
-        DeleteObject(g_hCanvasFont);
-        g_hCanvasFont = NULL;
+        DeleteObject(s_hCanvasFont);
+        s_hCanvasFont = NULL;
     }
 }
 
+// WM_MENUSELECT
 void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     UINT uItem = LOWORD(wParam), fuFlags = HIWORD(wParam);
