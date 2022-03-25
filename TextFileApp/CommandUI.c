@@ -154,7 +154,7 @@ BOOL doCreateToolbar(HWND hwnd)
     size_t i, k;
     LPTSTR text;
 
-    // TODO:
+    // TODO: Invalidate iString's
     for (i = 0; i < _countof(buttons); ++i)
     {
         buttons[i].iString = -1;
