@@ -41,9 +41,6 @@ PROFILE g_profile;
 
 BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
 {
-#ifndef DX_APP_COMPANY_NAME_IN_ENGLISH
-    #define DX_APP_COMPANY_NAME_IN_ENGLISH DX_COMPANY_NAME_IN_ENGLISH
-#endif
     doSetRegistryKey(DX_APP_COMPANY_NAME_IN_ENGLISH);
 
 #define LOAD_INT(section, name, var, defvalue) do { \
