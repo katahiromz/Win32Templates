@@ -5,6 +5,8 @@ extern HWND g_hCanvasWnd;
 extern HWND g_hToolbar;
 extern HWND g_hStatusBar;
 
+static HFONT g_hCanvasFont = NULL;
+
 static HIMAGELIST s_himlToolbar = NULL; // image list for toolbar
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -241,6 +243,16 @@ BOOL createControls(HWND hwnd)
     DWORD style, exstyle;
     INT id;
 
+    // TODO: Create canvas font
+    {
+        LOGFONT lf = { 24 };
+        lf.lfCharSet = DEFAULT_CHARSET;
+        lf.lfPitchAndFamily = FIXED_PITCH | FF_MODERN;
+        g_hCanvasFont = CreateFontIndirect(&lf);
+        if (!g_hCanvasFont)
+            return FALSE;
+    }
+
     style = WS_CHILD | WS_VISIBLE | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | WS_HSCROLL | WS_VSCROLL;
     exstyle = WS_EX_CLIENTEDGE;
     id = IDW_CANVAS;
@@ -248,7 +260,10 @@ BOOL createControls(HWND hwnd)
         hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
     if (!g_hCanvasWnd)
         return FALSE;
-    SetWindowFont(g_hCanvasWnd, GetStockFont(DEFAULT_GUI_FONT), TRUE);
+
+    // TODO: Set canvas font
+    //SetWindowFont(g_hCanvasWnd, GetStockFont(DEFAULT_GUI_FONT), TRUE);
+    SetWindowFont(g_hCanvasWnd, g_hCanvasFont, TRUE);
 
     if (!doCreateToolbar(hwnd))
         return FALSE;
@@ -273,6 +288,11 @@ void destroyControls(HWND hwnd)
     {
         ImageList_Destroy(s_himlToolbar);
         s_himlToolbar = NULL;
+    }
+    if (g_hCanvasFont)
+    {
+        DeleteObject(g_hCanvasFont);
+        g_hCanvasFont = NULL;
     }
 }
 
