@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-BOOL GetBitmapInfoDx(HBITMAP hbm, BITMAP *pbm);
+#define GetBitmapInfoDx(hbm, pbm) GetObject((hbm), sizeof(BITMAP), (pbm))
 
 HBITMAP LoadBitmapFromFileDx(LPCTSTR pszFileName);
 BOOL SaveBitmapToFileDx(LPCTSTR pszFileName, HBITMAP hbm);

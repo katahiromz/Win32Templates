@@ -1,11 +1,4 @@
 #include "Common.h"
-#include <gdiplus.h>
-#pragma comment(lib, "gdiplus.lib")
-
-BOOL GetBitmapInfoDx(HBITMAP hbm, BITMAP *pbm)
-{
-    return !!GetObject(hbm, sizeof(BITMAP), pbm);
-}
 
 typedef struct tagBITMAPINFOEX
 {
@@ -181,99 +174,14 @@ HBITMAP Create32BppBitmapDx(INT width, INT height)
     return hbm;
 }
 
-HBITMAP LoadImageFromFileDx(LPCTSTR pszFileName)
-{
-    HBITMAP hbm = NULL;
-    LPWSTR pszWideFileName = WideFromText(CP_ACP, pszFileName);
-#ifdef __cplusplus
-    using namespace Gdiplus;
-#endif
-    {
-        GdiplusStartupInput gdiplusStartupInput;
-        ULONG_PTR gdiplusToken;
-
-        GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
-        Bitmap* pBitmap = Gdiplus::Bitmap::FromFile(pszWideFileName);
-        if (pBitmap)
-        {
-            pBitmap->GetHBITMAP(Color::MakeARGB(255, 255, 255, 255), &hbm);
-            delete pBitmap;
-        }
-
-        GdiplusShutdown(gdiplusToken);
-    }
-    free(pszWideFileName);
-    return hbm;
-}
-
-BOOL SaveImageToFileDx(LPCTSTR pszFileName, HBITMAP hbm)
-{
-#ifdef __cplusplus
-    using namespace Gdiplus;
-#endif
-    BOOL ret = FALSE;
-    LPWSTR pszWideFileName = WideFromText(CP_ACP, pszFileName);
-    LPWSTR pchDotExt = PathFindExtensionW(pszWideFileName);
-    CLSID clsid;
-    if (lstrcmpiW(pchDotExt, L".bmp") == 0)
-    {
-        CLSIDFromString(L"{557cf400-1a04-11d3-9a73-0000f81ef32e}", &clsid);
-    }
-    else if (lstrcmpiW(pchDotExt, L".png") == 0)
-    {
-        CLSIDFromString(L"{557CF406-1A04-11D3-9A73-0000F81EF32E}", &clsid);
-    }
-    else if (lstrcmpiW(pchDotExt, L".jpg") == 0 || lstrcmpiW(pchDotExt, L".jpeg") == 0)
-    {
-        CLSIDFromString(L"{557cf401-1a04-11d3-9a73-0000f81ef32e}", &clsid);
-    }
-    else if (lstrcmpiW(pchDotExt, L".gif") == 0)
-    {
-        CLSIDFromString(L"{557cf402-1a04-11d3-9a73-0000f81ef32e}", &clsid);
-    }
-    else if (lstrcmpiW(pchDotExt, L".tif") == 0 || lstrcmpiW(pchDotExt, L".tiff") == 0)
-    {
-        CLSIDFromString(L"{557cf405-1a04-11d3-9a73-0000f81ef32e}", &clsid);
-    }
-    else
-    {
-        free(pszWideFileName);
-        return FALSE;
-    }
-    {
-        GdiplusStartupInput gdiplusStartupInput;
-        ULONG_PTR gdiplusToken;
-        GpStatus status;
-
-        GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
-
-        Bitmap *pBitmap = Bitmap::FromHBITMAP(hbm, NULL);
-        if (pBitmap)
-        {
-            status = pBitmap->Save(pszWideFileName, &clsid, NULL);
-            delete pBitmap;
-
-            ret = (status == Ok);
-        }
-
-        GdiplusShutdown(gdiplusToken);
-    }
-    free(pszWideFileName);
-    return ret;
-}
-
 #ifdef UNITTEST
 #include "Utils.c"
 int main(void)
 {
     HBITMAP hbm = LoadBitmapFromFileDx("a.bmp");
     printf("hbm: %p\n", hbm);
-    //SaveImageToFileDx("b.gif", hbm);
-    DeleteObject(hbm);
-    //hbm = LoadImageFromFileDx("b.gif");
-    printf("hbm: %p\n", hbm);
     SaveBitmapToFileDx("c.bmp", hbm);
+    DeleteObject(hbm);
     return 0;
 }
 #endif

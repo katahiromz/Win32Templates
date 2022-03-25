@@ -1,8 +1,9 @@
 # libCommon.a
 add_library(Common STATIC
     Base64.c
-    Bitmap.cpp
+    Bitmap.c
     Framework.c
+    Image.c
     Recent.c
     Shortcut.c
     Utils.c
