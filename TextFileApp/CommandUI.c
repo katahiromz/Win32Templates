@@ -121,9 +121,9 @@ BOOL doCreateToolbar(HWND hwnd)
     DWORD style, exstyle;
     INT id;
     BOOL bStandardButtons = FALSE;  // TODO: Modify
+    BOOL bUseLargeButtons = TRUE;   // TODO: Modify
     BOOL bAddString = TRUE;         // TODO: Modify
     BOOL bList = FALSE;             // TODO: Modify
-    BOOL bUseLargeButtons = FALSE;  // TODO: Modify
     // TODO: Modify toolbar buttons
     static TBBUTTON buttons[] =
     {
