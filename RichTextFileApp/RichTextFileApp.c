@@ -60,7 +60,7 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
     LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
     LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
-    ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
     //LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE); // TODO:
     //LOAD_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3], TRUE); // TODO:
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
@@ -82,7 +82,7 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
     SAVE_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0]);
     SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
-    ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
     //SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]); // TODO:
     //SAVE_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3]); // TODO:
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);

@@ -47,6 +47,10 @@ INT EnableAutoAssertDx(BOOL bEnable);
     #define GetDlgItemTextDx GetDlgItemTextDxA
 #endif
 
+#define STATIC_ASSERT(exp) do { \
+    typedef char STATIC_ASSERT_DUMMY_TYPE_##__LINE__[exp ? 1 : -1]; \
+} while (0)
+
 void RebootDx(BOOL bForce);
 void LogOffDx(BOOL bForce);
 void PowerOffDx(BOOL bForce);
