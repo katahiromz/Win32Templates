@@ -397,6 +397,9 @@ BOOL doCreateRebar(HWND hwnd)
         SendMessage(g_hRebar, RB_SETBARINFO, 0, (LPARAM)&info);
     }
 
+    // TODO: Create toolbars
+    ASSERT(DX_APP_NUM_TOOLBARS == 2);
+
     g_hToolbars[0] = doCreateToolbar1(g_hRebar, 0);
     if (!g_hToolbars[0])
         return FALSE;

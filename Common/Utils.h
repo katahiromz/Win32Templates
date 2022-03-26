@@ -23,6 +23,7 @@ void AssertDx(const char *text, const char *file, int line);
 void DebugPrintfDxA(const char *fmt, ...);
 void DebugPrintfDxW(const wchar_t *fmt, ...);
 void HexDumpDx(const void *ptr, size_t size, size_t top_addr OPTIONAL);
+INT EnableAutoAssertDx(BOOL bEnable);
 
 #ifdef NDEBUG
     #define TRACEA

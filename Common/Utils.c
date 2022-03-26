@@ -370,11 +370,34 @@ DWORD GetComCtl32VersionDx(VOID)
     return MAKELONG(dvi.dwMinorVersion, dvi.dwMajorVersion);
 }
 
+static BOOL s_bAutoAsserting = FALSE;
+static INT s_nAutoAssertFailCount = 0;
+
+BOOL EnableAutoAssertDx(BOOL bEnable)
+{
+    INT nFailCount = 0;
+    if (bEnable)
+    {
+        ASSERT(!s_bAutoAsserting);
+        s_bAutoAsserting = TRUE;
+        s_nAutoAssertFailCount = 0;
+    }
+    else
+    {
+        ASSERT(s_bAutoAsserting);
+        s_bAutoAsserting = FALSE;
+        nFailCount = s_nAutoAssertFailCount;
+        s_nAutoAssertFailCount = 0;
+    }
+    return nFailCount;
+}
+
 void AssertDx(const char *text, const char *file, int line)
 {
-    char buf[512];
+    char szMsg[512];
     INT id;
-    StringCchPrintfA(buf, _countof(buf),
+
+    StringCchPrintfA(szMsg, _countof(szMsg),
         "Assertion Failure!\n\n"
         "File: %s\n"
         "Line: %d\n"
@@ -383,7 +406,15 @@ void AssertDx(const char *text, const char *file, int line)
         "Click [Retry] to debug the application.\n"
         "Click [Ignore] to ignore this message.",
         file, line, text);
-    id = MessageBoxA(NULL, buf, "ASSERT", MB_ICONERROR | MB_ABORTRETRYIGNORE);
+
+    if (s_bAutoAsserting)
+    {
+        ++s_nAutoAssertFailCount;
+        TRACEA("%s\n", szMsg);
+        return;
+    }
+
+    id = MessageBoxA(NULL, szMsg, "ASSERT", MB_ICONERROR | MB_ABORTRETRYIGNORE);
     switch (id)
     {
     case IDABORT:
