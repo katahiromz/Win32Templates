@@ -60,7 +60,7 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
     LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
     LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
-#ifdef DX_APP_USE_TEST_BUTTONS
+#ifdef DX_APP_USE_TEST_CTRLS
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
     LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE);
 #else
@@ -86,7 +86,7 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
     SAVE_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0]);
     SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
-#ifdef DX_APP_USE_TEST_BUTTONS
+#ifdef DX_APP_USE_TEST_CTRLS
     SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]);
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
 #else
@@ -357,20 +357,33 @@ void OnDropFiles(HWND hwnd, HDROP hdrop)
     DragFinish(hdrop);
 }
 
-BOOL doTest(HWND hwnd, INT index)
+BOOL doTest(HWND hwnd, INT index, UINT codeNotify)
 {
-    switch (index)
+#ifdef DX_APP_USE_TEST_CTRLS
+    extern HWND g_hwndTestCtrls[DX_APP_USE_TEST_CTRLS];
+    TCHAR szText[64];
+
+    if (codeNotify != 0 && codeNotify != BN_CLICKED)
+        return FALSE;
+
+    switch (index + 1)
     {
-    case 0:
     case 1:
-    case 2:
-    case 3:
         Recent_UnitTest();
+        GetWindowText(g_hwndTestCtrls[0], szText, _countof(szText));
+        MsgBoxDx(hwnd, szText, LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+        break;
+    case 2:
         dumpCommandUI();
-        HexDumpDx(g_hInstance, 343, (size_t)g_hInstance);
-        MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+        MsgBoxDx(hwnd, TEXT("This is Test 2"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+        break;
+    case 3:
+        HexDumpDx(g_hInstance, 48, (size_t)g_hInstance);
+        MsgBoxDx(hwnd, TEXT("This is Test 3"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
         break;
     }
+#endif
+
     return TRUE;
 }
 
@@ -403,8 +416,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
     case ID_TEST_1:
     case ID_TEST_2:
     case ID_TEST_3:
-    case ID_TEST_4:
-        doTest(hwnd, id - ID_TEST_1);
+        doTest(hwnd, id - ID_TEST_1, codeNotify);
         break;
     case ID_NEW:
         OnFileNew(hwnd);
@@ -471,7 +483,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         ASSERT(!"Not implemented yet!");
         break;
     case ID_SELECTALL:
-        SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
+        else
+            SendMessage(GetFocus(), EM_SETSEL, 0, -1);
         break;
     case ID_PAGESETUP:
         ASSERT(!"Not implemented yet!");
@@ -805,7 +820,6 @@ INT doRun(void)
     {
         if (g_hMainWnd && TranslateAccelerator(g_hMainWnd, g_hAccel, &msg))
             continue;
-
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }

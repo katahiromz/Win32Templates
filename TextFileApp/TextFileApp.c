@@ -432,7 +432,10 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         ASSERT(!"Not implemented yet!");
         break;
     case ID_SELECTALL:
-        SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, EM_SETSEL, 0, -1);
+        else
+            SendMessage(GetFocus(), EM_SETSEL, 0, -1);
         break;
     case ID_PAGESETUP:
         ASSERT(!"Not implemented yet!");

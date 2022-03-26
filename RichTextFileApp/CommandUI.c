@@ -10,8 +10,8 @@ static HFONT s_hCanvasFont = NULL;
 
 static HIMAGELIST s_himlToolbars[DX_APP_NUM_TOOLBARS] = { NULL };
 
-#ifdef DX_APP_USE_TEST_BUTTONS
-    static HWND s_hwndTestButtons[DX_APP_USE_TEST_BUTTONS];
+#ifdef DX_APP_USE_TEST_CTRLS
+    HWND g_hwndTestCtrls[DX_APP_USE_TEST_CTRLS];
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,7 +124,7 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     // TODO: Add toolbar commands
     checkCommand(ID_TOOLBAR1, IsWindowVisible(g_hToolbars[0]), hMenu);
     checkCommand(ID_TOOLBAR2, IsWindowVisible(g_hToolbars[1]), hMenu);
-#ifdef DX_APP_USE_TEST_BUTTONS
+#ifdef DX_APP_USE_TEST_CTRLS
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
     checkCommand(ID_TOOLBAR3, IsWindowVisible(g_hToolbars[2]), hMenu);
 #else
@@ -395,7 +395,7 @@ HWND doCreateToolbar2(HWND hwnd, INT index, BOOL bHasRebar)
     return hwndToolbar;
 }
 
-#ifdef DX_APP_USE_TEST_BUTTONS
+#ifdef DX_APP_USE_TEST_CTRLS
 HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
 {
     HWND hwndToolbar = NULL;
@@ -405,9 +405,10 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
     BOOL bAddString = FALSE;        // TODO: Modify
     BOOL bList = FALSE;             // TODO: Modify
     // TODO: Modify toolbar buttons
-    static TBBUTTON buttons[DX_APP_USE_TEST_BUTTONS] =
+    static TBBUTTON buttons[DX_APP_USE_TEST_CTRLS + 1] =
     {
         // { image index, command id, button state, BTNS_, ... }
+        { -1, ID_TEST_9, 0, BTNS_SEP },
         { -1, ID_TEST_1, 0, BTNS_SEP },
         { -1, ID_TEST_2, 0, BTNS_SEP },
         { -1, ID_TEST_3, 0, BTNS_SEP },
@@ -440,25 +441,36 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
     SendMessage(hwndToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
     SetWindowLongPtr(hwndToolbar, GWL_STYLE, GetWindowStyle(hwndToolbar) | TBSTYLE_FLAT);
 
-    for (i = 0; i < DX_APP_USE_TEST_BUTTONS; ++i)
+    for (i = 0; i < DX_APP_USE_TEST_CTRLS; ++i)
     {
         TCHAR szText[MAX_PATH];
-
         HFONT hFont = GetStockFont(DEFAULT_GUI_FONT);
-        StringCchPrintf(szText, _countof(szText), TEXT("Test %d"), (INT)(i + 1));
+
+        if (i == 0)
+        {
+            style = WS_CHILD | WS_VISIBLE | ES_LEFT | ES_AUTOHSCROLL;
+            exstyle = WS_EX_CLIENTEDGE;
+            g_hwndTestCtrls[i] = CreateWindowEx(exstyle, TEXT("EDIT"), NULL, style,
+                0, 0, 0, 0, hwndToolbar, (HMENU)(INT_PTR)(IDW_TEST_CTRL_1 + i), g_hInstance, NULL);
+            SetWindowFont(g_hwndTestCtrls[i], hFont, TRUE);
+            buttons[i].iBitmap = 80 + cxPadding; // control width
+            continue;
+        }
+
+        StringCchPrintf(szText, _countof(szText), TEXT("Test %d"), (INT)i);
         siz = GetTextExtentDx(szText, hFont);
         siz.cx += 8;
         siz.cy += 8;
-        buttons[i].iBitmap = siz.cx + cxPadding; // button width
+        buttons[i].iBitmap = siz.cx + cxPadding; // control width
 
         style = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
         exstyle = 0;
-        s_hwndTestButtons[i] = CreateWindowEx(exstyle, TEXT("BUTTON"), szText, style,
-            0, 0, 0, 0, hwndToolbar, (HMENU)(INT_PTR)(IDW_TEST_BUTTON_1 + i), g_hInstance, NULL);
-        if (s_hwndTestButtons[i] == NULL)
+        g_hwndTestCtrls[i] = CreateWindowEx(exstyle, TEXT("BUTTON"), szText, style,
+            0, 0, 0, 0, hwndToolbar, (HMENU)(INT_PTR)(buttons[i].idCommand), g_hInstance, NULL);
+        if (g_hwndTestCtrls[i] == NULL)
             return FALSE;
 
-        SetWindowFont(s_hwndTestButtons[i], hFont, TRUE);
+        SetWindowFont(g_hwndTestCtrls[i], hFont, TRUE);
     }
 
     if (bAddString)
@@ -507,13 +519,13 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
 
     SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
 
-    for (i = 0; i < DX_APP_USE_TEST_BUTTONS; ++i)
+    for (i = 0; i < DX_APP_USE_TEST_CTRLS; ++i)
     {
         RECT rc;
-        SendMessage(hwndToolbar, TB_GETRECT, (INT)(ID_TEST_1 + i), (LPARAM)&rc);
+        SendMessage(hwndToolbar, TB_GETITEMRECT, (INT)i, (LPARAM)&rc);
         rc.right -= cxPadding;
 
-        MoveWindow(s_hwndTestButtons[i], rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+        MoveWindow(g_hwndTestCtrls[i], rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
     }
 
     // TODO: Set extended style
@@ -528,7 +540,7 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
 
     return hwndToolbar;
 }
-#endif // def DX_APP_USE_TEST_BUTTONS
+#endif // def DX_APP_USE_TEST_CTRLS
 
 BOOL doCreateRebar(HWND hwnd)
 {
@@ -554,7 +566,7 @@ BOOL doCreateRebar(HWND hwnd)
     if (!g_hToolbars[1])
         return FALSE;
 
-#ifdef DX_APP_USE_TEST_BUTTONS
+#ifdef DX_APP_USE_TEST_CTRLS
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
     g_hToolbars[2] = doCreateToolbar3(g_hRebar, 2, g_hRebar != NULL);
     if (!g_hToolbars[1])
@@ -642,6 +654,12 @@ void destroyControls(HWND hwnd)
     ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
         DestroyWindow(hwndTB);
     });
+
+#ifdef DX_APP_USE_TEST_CTRLS
+    ARRAY_FOREACH(HWND hwndTest, g_hwndTestCtrls, {
+        DestroyWindow(hwndTest);
+    });
+#endif
 
     DestroyWindow(g_hRebar);
     DestroyWindow(g_hStatusBar);
