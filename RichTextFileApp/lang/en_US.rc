@@ -108,8 +108,8 @@ FILETYPE        0x1
 
 STRINGTABLE
 {
-    IDS_APPNAME, "TextFileApp"
-    IDS_TITLE, "TextFileApp - %s"
+    IDS_APPNAME, "RichTextFileApp"
+    IDS_TITLE, "RichTextFileApp - %s"
     IDS_FAILREGCLASS, "Failed to register window classes."
     IDS_FAILCREATEWND, "Failed to create the main window."
     IDS_OPEN, "Open File"
