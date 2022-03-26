@@ -36,3 +36,13 @@ You can use the following image indexes (defined in <commctrl.h>):
 #define VIEW_NETCONNECT         9
 #define VIEW_NETDISCONNECT      10
 #define VIEW_NEWFOLDER          11
+
+# For Toolbar-Hist
+
+You can use the following image indexes (defined in <commctrl.h>):
+
+#define HIST_BACK               0
+#define HIST_FORWARD            1
+#define HIST_FAVORITES          2
+#define HIST_ADDTOFAVORITES     3
+#define HIST_VIEWTREE           4
