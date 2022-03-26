@@ -2,12 +2,14 @@
 
 extern HWND g_hMainWnd;
 extern HWND g_hCanvasWnd;
-extern HWND g_hToolbar;
+extern HWND g_hRebar;
+extern HWND g_hToolbars[DX_APP_NUM_TOOLBARS];
 extern HWND g_hStatusBar;
 
 static HFONT s_hCanvasFont = NULL;
 
 static HIMAGELIST s_himlToolbar = NULL;
+static HIMAGELIST s_himlToolbar2 = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMAND UI
@@ -69,7 +71,11 @@ LPTSTR getCommandText(INT id, BOOL bDetail)
 
 static void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
 {
-    SendMessage(g_hToolbar, TB_ENABLEBUTTON, id, bEnabled);
+    {
+        size_t i;
+        for (i = 0; i < _countof(g_hToolbars); ++i)
+            SendMessage(g_hToolbars[i], TB_ENABLEBUTTON, id, bEnabled);
+    }
 
     if (bEnabled)
         EnableMenuItem(hMenu, id, MF_ENABLED);
@@ -79,7 +85,11 @@ static void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
 
 static void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 {
-    SendMessage(g_hToolbar, TB_CHECKBUTTON, id, bChecked);
+    {
+        size_t i;
+        for (i = 0; i < _countof(g_hToolbars); ++i)
+            SendMessage(g_hToolbars[i], TB_CHECKBUTTON, id, bChecked);
+    }
 
     if (bChecked)
         CheckMenuItem(hMenu, id, MF_CHECKED);
@@ -89,7 +99,12 @@ static void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 
 static void hideCommand(INT id, HMENU hMenu)
 {
-    SendMessage(g_hToolbar, TB_HIDEBUTTON, id, TRUE);
+    {
+        size_t i;
+        for (i = 0; i < _countof(g_hToolbars); ++i)
+            SendMessage(g_hToolbars[i], TB_HIDEBUTTON, id, TRUE);
+    }
+
     DeleteMenu(hMenu, id, MF_BYCOMMAND);
 }
 
@@ -108,7 +123,7 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     enableCommand(ID_REPLACE, FALSE, hMenu);
     enableCommand(ID_HELP, FALSE, hMenu);
     enableCommand(ID_PAGESETUP, FALSE, hMenu);
-    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbar), hMenu);
+    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbars[0]), hMenu);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     //hideCommand(ID_REDO, hMenu);
 }
@@ -116,13 +131,15 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
 ///////////////////////////////////////////////////////////////////////////////
 // CONTROLS
 
-BOOL doCreateToolbar(HWND hwnd)
+HWND doCreateToolbar(HWND hwnd)
 {
+    HWND hwndToolbar = NULL;
     DWORD style, exstyle;
     INT id;
     BOOL bStandardButtons = FALSE;  // TODO: Modify
     BOOL bUseLargeButtons = TRUE;   // TODO: Modify
-    BOOL bAddString = TRUE;         // TODO: Modify
+    BOOL bAddString = FALSE;        // TODO: Modify
+    BOOL bHasRebar = TRUE;          // TODO: Modify
     BOOL bList = FALSE;             // TODO: Modify
     // TODO: Modify toolbar buttons
     static TBBUTTON buttons[] =
@@ -160,20 +177,22 @@ BOOL doCreateToolbar(HWND hwnd)
         buttons[i].iString = -1;
     }
 
-    // TODO: Create g_hToolbar
-    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
+    // TODO: Create hwndToolbar
+    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS | CCS_NORESIZE;
+    if (bHasRebar)
+        style |= CCS_NORESIZE | CCS_NODIVIDER;
     if (bList && bAddString)
         style |= TBSTYLE_LIST;
     exstyle = 0;
     id = IDW_TOOLBAR;
-    g_hToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
-                                style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
-    if (!g_hToolbar)
-        return FALSE;
+    hwndToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
+                                 style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
+    if (!hwndToolbar)
+        return NULL;
 
     // TODO: Initialize toolbar
-    SendMessage(g_hToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
-    SetWindowLongPtr(g_hToolbar, GWL_STYLE, GetWindowStyle(g_hToolbar) | TBSTYLE_FLAT);
+    SendMessage(hwndToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    SetWindowLongPtr(hwndToolbar, GWL_STYLE, GetWindowStyle(hwndToolbar) | TBSTYLE_FLAT);
 
     if (bAddString)
     {
@@ -183,12 +202,12 @@ BOOL doCreateToolbar(HWND hwnd)
                 continue;
 
             text = getCommandText(buttons[k].idCommand, FALSE);
-            buttons[k].iString = (INT)SendMessage(g_hToolbar, TB_ADDSTRING, 0, (LPARAM)text);
+            buttons[k].iString = (INT)SendMessage(hwndToolbar, TB_ADDSTRING, 0, (LPARAM)text);
         }
     }
 
     // Enable multiple image lists
-    SendMessage(g_hToolbar, CCM_SETVERSION, 5, 0);
+    SendMessage(hwndToolbar, CCM_SETVERSION, 5, 0);
 
     if (bStandardButtons) // standard buttons
     {
@@ -197,17 +216,17 @@ BOOL doCreateToolbar(HWND hwnd)
             TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_LARGE_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_HIST_LARGE_COLOR };
-            SendMessage(g_hToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
+            SendMessage(hwndToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
         }
         else
         {
             TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_SMALL_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_HIST_SMALL_COLOR };
-            SendMessage(g_hToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
+            SendMessage(hwndToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
         }
 
-        SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+        SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
     else // non-standard
     {
@@ -227,16 +246,16 @@ BOOL doCreateToolbar(HWND hwnd)
             nButtonImageWidth = nButtonImageHeight = 16;
         }
 
-        SendMessage(g_hToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
+        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
         s_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
                                             nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
                                             LR_CREATEDIBSECTION);
         if (!s_himlToolbar)
-            return FALSE;
+            return NULL;
 
-        SendMessage(g_hToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar);
-        SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar);
+        SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
 
     // TODO: Set extended style
@@ -246,7 +265,151 @@ BOOL doCreateToolbar(HWND hwnd)
             extended |= TBSTYLE_EX_MIXEDBUTTONS; // BTNS_SHOWTEXT works
         extended |= TBSTYLE_EX_DRAWDDARROWS; // BTNS_DROPDOWN and BTNS_WHOLEDROPDOWN will work
         //extended |= TBSTYLE_EX_HIDECLIPPEDBUTTONS;
-        SendMessage(g_hToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
+        SendMessage(hwndToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
+    }
+
+    return hwndToolbar;
+}
+
+HWND doCreateToolbar2(HWND hwnd)
+{
+    HWND hwndToolbar = NULL;
+    DWORD style, exstyle;
+    INT id;
+    BOOL bUseLargeButtons = TRUE;   // TODO: Modify
+    BOOL bAddString = FALSE;        // TODO: Modify
+    BOOL bHasRebar = TRUE;          // TODO: Modify
+    BOOL bList = FALSE;             // TODO: Modify
+    // TODO: Modify toolbar buttons
+    static TBBUTTON buttons[] =
+    {
+        // { image index, command id, button state, BTNS_, ... }
+        { HIST_BACK, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_FORWARD, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_FAVORITES, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_VIEWTREE, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+    };
+    size_t i, k;
+    LPTSTR text;
+
+    // TODO: Invalidate iString's
+    for (i = 0; i < _countof(buttons); ++i)
+    {
+        buttons[i].iString = -1;
+    }
+
+    // TODO: Create hwndToolbar
+    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
+    if (bHasRebar)
+        style |= CCS_NORESIZE | CCS_NODIVIDER;
+    if (bList && bAddString)
+        style |= TBSTYLE_LIST;
+    exstyle = 0;
+    id = IDW_TOOLBAR;
+    hwndToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
+                                 style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
+    if (!hwndToolbar)
+        return NULL;
+
+    // TODO: Initialize toolbar
+    SendMessage(hwndToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
+    SetWindowLongPtr(hwndToolbar, GWL_STYLE, GetWindowStyle(hwndToolbar) | TBSTYLE_FLAT);
+
+    if (bAddString)
+    {
+        for (k = 0; k < _countof(buttons); ++k)
+        {
+            if (buttons[k].fsStyle & BTNS_SEP)
+                continue;
+
+            text = getCommandText(buttons[k].idCommand, FALSE);
+            buttons[k].iString = (INT)SendMessage(hwndToolbar, TB_ADDSTRING, 0, (LPARAM)text);
+        }
+    }
+
+    // Enable multiple image lists
+    SendMessage(hwndToolbar, CCM_SETVERSION, 5, 0);
+
+    {
+        INT idBitmap, nButtonImageWidth, nButtonImageHeight;
+        // TODO: Change
+        COLORREF rgbMaskColor = RGB(255, 0, 255);
+        //COLORREF rgbMaskColor = CLR_NONE;
+
+        if (bUseLargeButtons)
+        {
+            idBitmap = IDB_LARGETOOLBAR2;
+            nButtonImageWidth = nButtonImageHeight = 24;
+        }
+        else
+        {
+            idBitmap = IDB_SMALLTOOLBAR2;
+            nButtonImageWidth = nButtonImageHeight = 16;
+        }
+
+        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
+
+        s_himlToolbar2 = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+                                             nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
+                                             LR_CREATEDIBSECTION);
+        if (!s_himlToolbar2)
+            return NULL;
+
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar2);
+        SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
+    }
+
+    // TODO: Set extended style
+    {
+        DWORD extended = 0;
+        if (bList)
+            extended |= TBSTYLE_EX_MIXEDBUTTONS; // BTNS_SHOWTEXT works
+        extended |= TBSTYLE_EX_DRAWDDARROWS; // BTNS_DROPDOWN and BTNS_WHOLEDROPDOWN will work
+        //extended |= TBSTYLE_EX_HIDECLIPPEDBUTTONS;
+        SendMessage(hwndToolbar, TB_SETEXTENDEDSTYLE, 0, extended);
+    }
+
+    return hwndToolbar;
+}
+
+BOOL doCreateRebar(HWND hwnd)
+{
+    DWORD style = WS_CHILD | WS_VISIBLE | RBS_BANDBORDERS | CCS_NODIVIDER | RBS_AUTOSIZE;
+    DWORD exstyle = WS_EX_TOOLWINDOW;
+    g_hRebar = CreateWindowEx(exstyle, REBARCLASSNAME, NULL, style,
+        0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)IDW_REBAR, g_hInstance, NULL);
+    if (!g_hRebar)
+        return FALSE;
+
+    {
+        REBARINFO info = { sizeof(info) };
+        SendMessage(g_hRebar, RB_SETBARINFO, 0, (LPARAM)&info);
+    }
+
+    g_hToolbars[0] = doCreateToolbar(g_hRebar);
+    if (!g_hToolbars[0])
+        return FALSE;
+
+    g_hToolbars[1] = doCreateToolbar2(g_hRebar);
+    if (!g_hToolbars[1])
+        return FALSE;
+
+    {
+        size_t i;
+        for (i = 0; i < _countof(g_hToolbars); ++i)
+        {
+            SIZE siz;
+            REBARBANDINFO band = { sizeof(band) };
+            HWND hwndTB = g_hToolbars[i];
+            SendMessage(hwndTB, TB_GETMAXSIZE, 0, (LPARAM)&siz);
+            band.fMask = RBBIM_STYLE | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
+            band.hwndChild = hwndTB;
+            band.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+            band.cxMinChild = siz.cx;
+            band.cyMinChild = siz.cy;
+            band.cx = siz.cx;
+            SendMessage(g_hRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&band);
+        }
     }
 
     return TRUE;
@@ -283,13 +446,14 @@ BOOL createControls(HWND hwnd)
     if (!g_hCanvasWnd)
         return FALSE;
 
+    // We have to receive EN_CHANGE from richedit
     SendMessage(g_hCanvasWnd, EM_SETEVENTMASK, 0, ENM_CHANGE | ENM_DROPFILES);
 
     // TODO: Set canvas font
     //SetWindowFont(g_hCanvasWnd, GetStockFont(DEFAULT_GUI_FONT), TRUE);
     SetWindowFont(g_hCanvasWnd, s_hCanvasFont, TRUE);
 
-    if (!doCreateToolbar(hwnd))
+    if (!doCreateRebar(hwnd))
         return FALSE;
 
     // TODO: Create the status bar
@@ -306,13 +470,25 @@ BOOL createControls(HWND hwnd)
 void destroyControls(HWND hwnd)
 {
     DestroyWindow(g_hCanvasWnd);
-    DestroyWindow(g_hToolbar);
+
+    {
+        size_t i;
+        for (i = 0; i < _countof(g_hToolbars); ++i)
+            DestroyWindow(g_hToolbars[i]);
+    }
+
+    DestroyWindow(g_hRebar);
     DestroyWindow(g_hStatusBar);
 
     if (s_himlToolbar)
     {
         ImageList_Destroy(s_himlToolbar);
         s_himlToolbar = NULL;
+    }
+    if (s_himlToolbar2)
+    {
+        ImageList_Destroy(s_himlToolbar2);
+        s_himlToolbar2 = NULL;
     }
     if (s_hCanvasFont)
     {

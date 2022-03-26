@@ -5,6 +5,8 @@
 
 #define IDB_SMALLTOOLBAR                    100
 #define IDB_LARGETOOLBAR                    101
+#define IDB_SMALLTOOLBAR2                   102
+#define IDB_LARGETOOLBAR2                   103
 
 #define IDD_ABOUT                           100
 

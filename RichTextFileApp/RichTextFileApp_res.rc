@@ -18,6 +18,10 @@ IDB_SMALLTOOLBAR BITMAP "res/Bitmap_100.bmp"
 
 IDB_LARGETOOLBAR BITMAP "res/Bitmap_101.bmp"
 
+IDB_SMALLTOOLBAR2 BITMAP "res/Bitmap_102.bmp"
+
+IDB_LARGETOOLBAR2 BITMAP "res/Bitmap_103.bmp"
+
 //////////////////////////////////////////////////////////////////////////////
 // RT_ACCELERATOR
 

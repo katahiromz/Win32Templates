@@ -6,7 +6,8 @@
 HINSTANCE   g_hInstance       = NULL; // module handle
 HWND        g_hMainWnd        = NULL; // main window
 HWND        g_hCanvasWnd      = NULL; // IDW_CANVAS
-HWND        g_hToolbar        = NULL; // IDW_TOOLBAR
+HWND        g_hToolbars[DX_APP_NUM_TOOLBARS] = { NULL }; // IDW_TOOLBAR, IDW_TOOLBAR2
+HWND        g_hRebar          = NULL; // IDW_REBAR
 HWND        g_hStatusBar      = NULL; // IDW_STATUSBAR
 HACCEL      g_hAccel          = NULL; // IDR_ACCEL
 BOOL        g_bFileModified   = FALSE; // Is file modified?
@@ -309,9 +310,24 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
         return FALSE;
 
     if (g_profile.bShowToolbar)
-        ShowWindow(g_hToolbar, SW_SHOWNOACTIVATE);
+    {
+        ShowWindow(g_hToolbars[0], SW_SHOWNOACTIVATE);
+        SendMessage(g_hRebar, RB_SHOWBAND, 0, TRUE);
+    }
+    else
+    {
+        ShowWindow(g_hToolbars[0], SW_HIDE);
+        SendMessage(g_hRebar, RB_SHOWBAND, 0, FALSE);
+    }
+
     if (g_profile.bShowStatusBar)
+    {
         ShowWindow(g_hStatusBar, SW_SHOWNOACTIVATE);
+    }
+    else
+    {
+        ShowWindow(g_hStatusBar, SW_HIDE);
+    }
 
     PostMessage(hwnd, WM_SIZE, 0, 0);
     PostMessage(hwnd, WM_COMMAND, 0, 0);
@@ -394,15 +410,17 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_TOOLBAR:
-        if (IsWindowVisible(g_hToolbar))
+        if (IsWindowVisible(g_hToolbars[0]))
         {
-            ShowWindow(g_hToolbar, SW_HIDE);
+            ShowWindow(g_hToolbars[0], SW_HIDE);
+            SendMessage(g_hRebar, RB_SHOWBAND, 0, FALSE);
         }
         else
         {
-            ShowWindow(g_hToolbar, SW_SHOWNOACTIVATE);
+            ShowWindow(g_hToolbars[0], SW_SHOWNOACTIVATE);
+            SendMessage(g_hRebar, RB_SHOWBAND, 0, TRUE);
         }
-        g_profile.bShowToolbar = IsWindowVisible(g_hToolbar);
+        g_profile.bShowToolbar = IsWindowVisible(g_hToolbars[0]);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_UNDO:
@@ -505,34 +523,26 @@ void OnMove(HWND hwnd, int x, int y)
     }
 }
 
-void OnSize(HWND hwnd, UINT state, int cx, int cy)
+void rearrangeControls(HWND hwnd, BOOL bFromRebar)
 {
     RECT rc, rcWnd, rcStatus, rcToolbar;
 
     GetClientRect(hwnd, &rc);
     GetWindowRect(hwnd, &rcWnd);
 
-    if (g_hMainWnd)
+    if (!bFromRebar)
     {
-        // TODO: Save the main window size
-        if (!IsIconic(hwnd) && !IsZoomed(hwnd))
-        {
-            g_profile.nWindowCX = rcWnd.right - rcWnd.left;
-            g_profile.nWindowCY = rcWnd.bottom - rcWnd.top;
-        }
-        g_profile.bMaximized = IsZoomed(hwnd);
+        SendMessage(g_hRebar, WM_SIZE, 0, 0);
     }
 
-    SendMessage(g_hToolbar, TB_AUTOSIZE, 0, 0);
-    SendMessage(g_hStatusBar, WM_SIZE, 0, 0);
-
-    if (IsWindowVisible(g_hToolbar))
+    if (IsWindowVisible(g_hRebar))
     {
-        GetWindowRect(g_hToolbar, &rcToolbar);
+        GetWindowRect(g_hRebar, &rcToolbar);
 
         rc.top += rcToolbar.bottom - rcToolbar.top;
     }
 
+    SendMessage(g_hStatusBar, WM_SIZE, 0, 0);
     if (IsWindowVisible(g_hStatusBar))
     {
         INT an[2];
@@ -547,6 +557,26 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
     }
 
     MoveWindow(g_hCanvasWnd, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+}
+
+void OnSize(HWND hwnd, UINT state, int cx, int cy)
+{
+    RECT rcWnd;
+
+    GetWindowRect(hwnd, &rcWnd);
+
+    if (g_hMainWnd)
+    {
+        // TODO: Save the main window size
+        if (!IsIconic(hwnd) && !IsZoomed(hwnd))
+        {
+            g_profile.nWindowCX = rcWnd.right - rcWnd.left;
+            g_profile.nWindowCY = rcWnd.bottom - rcWnd.top;
+        }
+        g_profile.bMaximized = IsZoomed(hwnd);
+    }
+
+    rearrangeControls(hwnd, FALSE);
 }
 
 void OnClose(HWND hwnd)
@@ -600,6 +630,9 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 
     switch (pnmhdr->code)
     {
+    case RBN_AUTOSIZE:
+        rearrangeControls(hwnd, TRUE);
+        break;
     case TTN_NEEDTEXT:
         {
             TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pnmhdr;
@@ -613,6 +646,7 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
                 pTTT->lpszText = text;
             }
         }
+        break;
     }
 
     return 0;
