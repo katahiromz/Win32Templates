@@ -124,6 +124,23 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     hideCommand(ID_TOOLBAR4, hMenu);
 }
 
+void showToolbar(INT index, BOOL bShow)
+{
+    HWND hwndTB;
+    ASSERT(index < DX_APP_NUM_TOOLBARS);
+    hwndTB = g_hToolbars[index];
+    if (bShow)
+    {
+        ShowWindow(hwndTB, SW_SHOWNOACTIVATE);
+        SendMessage(g_hRebar, RB_SHOWBAND, index, TRUE);
+    }
+    else
+    {
+        ShowWindow(hwndTB, SW_HIDE);
+        SendMessage(g_hRebar, RB_SHOWBAND, index, FALSE);
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // CONTROLS
 
@@ -180,7 +197,7 @@ HWND doCreateToolbar(HWND hwnd)
     if (bList && bAddString)
         style |= TBSTYLE_LIST;
     exstyle = 0;
-    id = IDW_TOOLBAR;
+    id = IDW_TOOLBAR1;
     hwndToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
                                  style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
     if (!hwndToolbar)
@@ -301,7 +318,7 @@ HWND doCreateToolbar2(HWND hwnd)
     if (bList && bAddString)
         style |= TBSTYLE_LIST;
     exstyle = 0;
-    id = IDW_TOOLBAR;
+    id = IDW_TOOLBAR2;
     hwndToolbar = CreateWindowEx(exstyle, TOOLBARCLASSNAME, NULL,
                                  style, 0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)id, g_hInstance, NULL);
     if (!hwndToolbar)

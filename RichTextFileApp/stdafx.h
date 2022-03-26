@@ -14,7 +14,9 @@
 
 // The window IDs
 #define IDW_CANVAS edt1
-#define IDW_TOOLBAR rct1
+#define IDW_TOOLBAR1 rct1
 #define IDW_TOOLBAR2 rct2
+#define IDW_TOOLBAR3 rct3
+#define IDW_TOOLBAR4 rct4
 #define IDW_STATUSBAR stc1
 #define IDW_REBAR grp1

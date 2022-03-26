@@ -6,7 +6,7 @@
 HINSTANCE   g_hInstance       = NULL; // module handle
 HWND        g_hMainWnd        = NULL; // main window
 HWND        g_hCanvasWnd      = NULL; // IDW_CANVAS
-HWND        g_hToolbars[DX_APP_NUM_TOOLBARS] = { NULL }; // IDW_TOOLBAR, IDW_TOOLBAR2
+HWND        g_hToolbars[DX_APP_NUM_TOOLBARS] = { NULL }; // IDW_TOOLBAR1, IDW_TOOLBAR2
 HWND        g_hRebar          = NULL; // IDW_REBAR
 HWND        g_hStatusBar      = NULL; // IDW_STATUSBAR
 HACCEL      g_hAccel          = NULL; // IDR_ACCEL
@@ -22,6 +22,7 @@ BOOL registerControls(HINSTANCE hInst);
 BOOL createControls(HWND hwnd);
 void destroyControls(HWND hwnd);
 void OnMenuSelect(HWND hwnd, WPARAM wParam, LPARAM lParam);
+void showToolbar(INT index, BOOL bShow);
 
 // AboutDlg.c
 void doAboutDlg(HWND hwnd);
@@ -56,6 +57,7 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
     LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
     LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
+    ASSERT(DX_APP_NUM_TOOLBARS == 2);
     //LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE); // TODO:
     //LOAD_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3], TRUE); // TODO:
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
@@ -77,6 +79,7 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
     SAVE_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0]);
     SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
+    ASSERT(DX_APP_NUM_TOOLBARS == 2);
     //SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]); // TODO:
     //SAVE_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3]); // TODO:
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
@@ -318,23 +321,12 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
     {
         INT index = 0;
         ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
-            if (g_profile.bShowToolbars[index])
-            {
-                ShowWindow(hwndTB, SW_SHOWNOACTIVATE);
-                SendMessage(g_hRebar, RB_SHOWBAND, index, TRUE);
-            }
+            showToolbar(index, g_profile.bShowToolbars[index]);
             ++index;
         });
     }
 
-    if (g_profile.bShowStatusBar)
-    {
-        ShowWindow(g_hStatusBar, SW_SHOWNOACTIVATE);
-    }
-    else
-    {
-        ShowWindow(g_hStatusBar, SW_HIDE);
-    }
+    ShowWindow(g_hStatusBar, (g_profile.bShowStatusBar ? SW_SHOWNOACTIVATE : SW_HIDE));
 
     PostMessage(hwnd, WM_SIZE, 0, 0);
     PostMessage(hwnd, WM_COMMAND, 0, 0);
@@ -424,16 +416,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
             INT index = id - ID_TOOLBAR1;
             if (index < DX_APP_NUM_TOOLBARS)
             {
-                if (IsWindowVisible(g_hToolbars[index]))
-                {
-                    ShowWindow(g_hToolbars[index], SW_HIDE);
-                    SendMessage(g_hRebar, RB_SHOWBAND, index, FALSE);
-                }
-                else
-                {
-                    ShowWindow(g_hToolbars[index], SW_SHOWNOACTIVATE);
-                    SendMessage(g_hRebar, RB_SHOWBAND, index, TRUE);
-                }
+                showToolbar(index, !IsWindowVisible(g_hToolbars[index]));
                 g_profile.bShowToolbars[index] = IsWindowVisible(g_hToolbars[index]);
                 PostMessage(hwnd, WM_SIZE, 0, 0);
             }
