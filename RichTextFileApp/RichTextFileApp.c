@@ -60,8 +60,12 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
     LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
     LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
+#ifdef DX_APP_USE_TEST_BUTTONS
+    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+    LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE);
+#else
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
-    //LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE); // TODO:
+#endif
     //LOAD_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3], TRUE); // TODO:
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
     LOAD_INT("Settings", "Maximized", pProfile->bMaximized, FALSE);
@@ -82,8 +86,12 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
     SAVE_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0]);
     SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
+#ifdef DX_APP_USE_TEST_BUTTONS
+    SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]);
+    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+#else
     STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
-    //SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]); // TODO:
+#endif
     //SAVE_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3]); // TODO:
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
     SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
@@ -349,12 +357,20 @@ void OnDropFiles(HWND hwnd, HDROP hdrop)
     DragFinish(hdrop);
 }
 
-BOOL doTest(HWND hwnd)
+BOOL doTest(HWND hwnd, INT index)
 {
-    Recent_UnitTest();
-    dumpCommandUI();
-    HexDumpDx(g_hInstance, 343, (size_t)g_hInstance);
-    MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+    switch (index)
+    {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+        Recent_UnitTest();
+        dumpCommandUI();
+        HexDumpDx(g_hInstance, 343, (size_t)g_hInstance);
+        MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+        break;
+    }
     return TRUE;
 }
 
@@ -384,8 +400,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
     case ID_ABOUT:
         doAboutDlg(hwnd);
         break;
-    case ID_TEST:
-        doTest(hwnd);
+    case ID_TEST_1:
+    case ID_TEST_2:
+    case ID_TEST_3:
+    case ID_TEST_4:
+        doTest(hwnd, id - ID_TEST_1);
         break;
     case ID_NEW:
         OnFileNew(hwnd);

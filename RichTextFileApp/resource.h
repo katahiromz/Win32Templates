@@ -64,7 +64,6 @@
 
 #define ID_EXIT                             100
 #define ID_ABOUT                            101
-#define ID_TEST                             102
 #define ID_NEW                              103
 #define ID_OPEN                             104
 #define ID_SAVE                             105
@@ -91,6 +90,10 @@
 #define ID_BACK                             127
 #define ID_FORWARD                          128
 #define ID_FAVORITE                         129
+#define ID_TEST_1                           130
+#define ID_TEST_2                           131
+#define ID_TEST_3                           132
+#define ID_TEST_4                           133
 #define ID_RECENT_01                        201
 #define ID_RECENT_02                        202
 #define ID_RECENT_03                        203

@@ -22,7 +22,7 @@ You can use the following image indexes (defined in <commctrl.h>):
 #define STD_REPLACE             13
 #define STD_PRINT               14
 
-They are compatible to IDB_STD_SMALL_COLOR and IDB_STD_LARGE_COLOR.
+They are compatible to IDB_STD_SMALL_COLOR and IDB_STD_LARGE_COLOR of HINST_COMMCTRL.
 
 # For ToolBar-View:
 
@@ -41,7 +41,7 @@ You can use the following image indexes (defined in <commctrl.h>):
 #define VIEW_NETDISCONNECT      10
 #define VIEW_NEWFOLDER          11
 
-They are compatible to IDB_VIEW_SMALL_COLOR and IDB_VIEW_LARGE_COLOR.
+They are compatible to IDB_VIEW_SMALL_COLOR and IDB_VIEW_LARGE_COLOR of HINST_COMMCTRL.
 
 # For Toolbar-Hist:
 
@@ -53,4 +53,4 @@ You can use the following image indexes (defined in <commctrl.h>):
 #define HIST_ADDTOFAVORITES     3
 #define HIST_VIEWTREE           4
 
-They are compatible to IDB_HIST_SMALL_COLOR and IDB_HIST_LARGE_COLOR.
+They are compatible to IDB_HIST_SMALL_COLOR and IDB_HIST_LARGE_COLOR of HINST_COMMCTRL.

@@ -18,7 +18,9 @@ IDR_MAINMENU MENU
         MENUITEM "&Save\tCtrl+S", ID_SAVE
         MENUITEM "Save &As...\tShift+Ctrl+S", ID_SAVEAS
         MENUITEM SEPARATOR
-        MENUITEM "Do test", ID_TEST
+        MENUITEM "Do test &1", ID_TEST_1
+        MENUITEM "Do test &2", ID_TEST_2
+        MENUITEM "Do test &3", ID_TEST_3
         MENUITEM SEPARATOR
         MENUITEM "Page set&up...", ID_PAGESETUP
         MENUITEM "Print Pre&view", ID_PRINTPREVIEW

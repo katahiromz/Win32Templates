@@ -18,7 +18,9 @@ IDR_MAINMENU MENU
         MENUITEM "上書き保存(&S)\tCtrl+S", ID_SAVE
         MENUITEM "名前を付けて保存(&A)...\tShift+Ctrl+S", ID_SAVEAS
         MENUITEM SEPARATOR
-        MENUITEM "テスト", ID_TEST
+        MENUITEM "テスト 1", ID_TEST_1
+        MENUITEM "テスト 2", ID_TEST_2
+        MENUITEM "テスト 3", ID_TEST_3
         MENUITEM SEPARATOR
         MENUITEM "ページ設定(&U)...", ID_PAGESETUP
         MENUITEM "印刷プレビュー(&V)", ID_PRINTPREVIEW

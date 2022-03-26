@@ -498,3 +498,14 @@ void HexDumpDx(const void *ptr, size_t size, size_t top_addr)
 Quit:
     TRACEA("---[HexDump-%d.txt]---(DOWN TO HERE)---\n", s_i);
 }
+
+SIZE GetTextExtentDx(LPCTSTR pszText, HFONT hFont)
+{
+    SIZE ret;
+    HDC hDC = CreateCompatibleDC(NULL);
+    HGDIOBJ hFontOld = SelectObject(hDC, hFont);
+    GetTextExtentPoint32(hDC, pszText, lstrlen(pszText), &ret);
+    SelectObject(hDC, hFontOld);
+    DeleteDC(hDC);
+    return ret;
+}

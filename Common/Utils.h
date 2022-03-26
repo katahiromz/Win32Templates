@@ -47,9 +47,15 @@ INT EnableAutoAssertDx(BOOL bEnable);
     #define GetDlgItemTextDx GetDlgItemTextDxA
 #endif
 
-#define STATIC_ASSERT(exp) do { \
-    typedef char STATIC_ASSERT_DUMMY_TYPE_##__LINE__[exp ? 1 : -1]; \
-} while (0)
+#if (__cplusplus >= 201103L)
+    #define STATIC_ASSERT(exp) static_assert((exp), "")
+#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
+    #define STATIC_ASSERT(exp) _Static_assert((exp), "")
+#else
+    #define STATIC_ASSERT(exp) do { \
+        typedef char STATIC_ASSERT_DUMMY_TYPE_##__LINE__[(exp) ? 1 : -1]; \
+    } while (0)
+#endif
 
 void RebootDx(BOOL bForce);
 void LogOffDx(BOOL bForce);
@@ -65,6 +71,8 @@ DWORD GetComCtl32VersionDx(VOID);
         block \
     } \
 } while (0)
+
+SIZE GetTextExtentDx(LPCTSTR pszText, HFONT hFont);
 
 #ifdef __cplusplus
 }
