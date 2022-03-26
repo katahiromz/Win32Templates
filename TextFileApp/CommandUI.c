@@ -120,14 +120,15 @@ BOOL doCreateToolbar(HWND hwnd)
 {
     DWORD style, exstyle;
     INT id;
-    BOOL bStandardButtons = FALSE;  // TODO: Modify
-    BOOL bUseLargeButtons = TRUE;   // TODO: Modify
-    BOOL bAddString = TRUE;         // TODO: Modify
+    BOOL bStandardButtons = TRUE;  // TODO: Modify
+    BOOL bUseLargeButtons = FALSE;   // TODO: Modify
+    BOOL bAddString = FALSE;        // TODO: Modify
     BOOL bList = FALSE;             // TODO: Modify
     // TODO: Modify toolbar buttons
     static TBBUTTON buttons[] =
     {
         // { image index, command id, button state, BTNS_, ... }
+#if 0
         { STD_FILENEW, ID_NEW, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
         { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
         { STD_FILEOPEN, ID_OPEN, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
@@ -150,6 +151,20 @@ BOOL doCreateToolbar(HWND hwnd)
         { STD_REPLACE, ID_REPLACE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
         { -1, -1, TBSTATE_ENABLED, BTNS_SEP },
         { STD_HELP, ID_HELP, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+#else
+        { VIEW_LARGEICONS, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_SMALLICONS, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_LIST, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_DETAILS, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_SORTNAME, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_SORTSIZE, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_SORTDATE, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_SORTTYPE, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_PARENTFOLDER, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_NETCONNECT, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_NETDISCONNECT, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { VIEW_NEWFOLDER, ID_UNDO, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+#endif
     };
     size_t i, k;
     LPTSTR text;
@@ -194,12 +209,14 @@ BOOL doCreateToolbar(HWND hwnd)
     {
         if (bUseLargeButtons)
         {
-            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
+            //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
+            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_LARGE_COLOR };
             SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
         }
         else
         {
-            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
+            //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
+            TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_SMALL_COLOR };
             SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
         }
 
