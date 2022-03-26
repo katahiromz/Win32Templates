@@ -525,20 +525,26 @@ void OnMove(HWND hwnd, int x, int y)
 void rearrangeControls(HWND hwnd, BOOL bFromRebar)
 {
     RECT rc, rcWnd, rcStatus, rcToolbar;
+    BOOL bHasReber = (g_hRebar != NULL);
 
     GetClientRect(hwnd, &rc);
     GetWindowRect(hwnd, &rcWnd);
 
     if (!bFromRebar)
     {
-        SendMessage(g_hRebar, WM_SIZE, 0, 0);
+        if (bHasReber)
+            SendMessage(g_hRebar, WM_SIZE, 0, 0);
+        else
+            SendMessage(g_hToolbars[0], TB_AUTOSIZE, 0, 0);
     }
 
-    if (IsWindowVisible(g_hRebar))
     {
-        GetWindowRect(g_hRebar, &rcToolbar);
-
-        rc.top += rcToolbar.bottom - rcToolbar.top;
+        HWND hwndTarget = (bHasReber ? g_hRebar : g_hToolbars[0]);
+        if (IsWindowVisible(hwndTarget))
+        {
+            GetWindowRect(hwndTarget, &rcToolbar);
+            rc.top += rcToolbar.bottom - rcToolbar.top;
+        }
     }
 
     SendMessage(g_hStatusBar, WM_SIZE, 0, 0);
