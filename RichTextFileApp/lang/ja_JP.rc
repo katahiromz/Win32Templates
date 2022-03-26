@@ -54,6 +54,7 @@ IDR_MAINMENU MENU
         MENUITEM "ツールバー &2", ID_TOOLBAR2
         MENUITEM "ツールバー &3", ID_TOOLBAR3
         MENUITEM "ツールバー &4", ID_TOOLBAR4
+        MENUITEM SEPARATOR
         MENUITEM "ステータスバー(&S)", ID_STATUSBAR
     }
     POPUP "ヘルプ(&H)"
