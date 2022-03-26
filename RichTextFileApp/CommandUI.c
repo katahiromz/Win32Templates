@@ -445,7 +445,7 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
         TCHAR szText[MAX_PATH];
 
         HFONT hFont = GetStockFont(DEFAULT_GUI_FONT);
-        StringCchPrintf(szText, _countof(szText), TEXT("Test %d"), (INT)i);
+        StringCchPrintf(szText, _countof(szText), TEXT("Test %d"), (INT)(i + 1));
         siz = GetTextExtentDx(szText, hFont);
         siz.cx += 8;
         siz.cy += 8;
