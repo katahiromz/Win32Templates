@@ -118,6 +118,7 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     enableCommand(ID_PAGESETUP, FALSE, hMenu);
     checkCommand(ID_TOOLBAR1, IsWindowVisible(g_hToolbars[0]), hMenu);
     checkCommand(ID_TOOLBAR2, IsWindowVisible(g_hToolbars[1]), hMenu);
+    ASSERT(DX_APP_NUM_TOOLBARS == 2);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     hideCommand(ID_TOOLBAR3, hMenu);
     hideCommand(ID_TOOLBAR4, hMenu);
