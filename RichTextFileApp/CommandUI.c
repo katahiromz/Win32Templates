@@ -414,7 +414,6 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
     };
     size_t i, k;
     LPTSTR text;
-    INT x;
     SIZE siz;
     INT cxPadding = 4;
 
@@ -441,7 +440,6 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
     SendMessage(hwndToolbar, TB_BUTTONSTRUCTSIZE, sizeof(TBBUTTON), 0);
     SetWindowLongPtr(hwndToolbar, GWL_STYLE, GetWindowStyle(hwndToolbar) | TBSTYLE_FLAT);
 
-    x = 0;
     for (i = 0; i < DX_APP_USE_TEST_BUTTONS; ++i)
     {
         TCHAR szText[MAX_PATH];
@@ -451,7 +449,7 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
         siz = GetTextExtentDx(szText, hFont);
         siz.cx += 8;
         siz.cy += 8;
-        buttons[i].iBitmap = siz.cx + cxPadding;
+        buttons[i].iBitmap = siz.cx + cxPadding; // button width
 
         style = WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON;
         exstyle = 0;
@@ -459,8 +457,8 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
             0, 0, 0, 0, hwndToolbar, (HMENU)(INT_PTR)(IDW_TEST_BUTTON_1 + i), g_hInstance, NULL);
         if (s_hwndTestButtons[i] == NULL)
             return FALSE;
+
         SetWindowFont(s_hwndTestButtons[i], hFont, TRUE);
-        x += siz.cx + cxPadding;
     }
 
     if (bAddString)
