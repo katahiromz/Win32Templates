@@ -443,7 +443,7 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         Edit_Undo(g_hCanvasWnd);
         break;
     case ID_REDO:
-        ASSERT(!"Not implemented yet!");
+        SendMessage(g_hCanvasWnd, EM_REDO, 0, 0);
         break;
     case ID_CUT:
         SendMessage(g_hCanvasWnd, WM_CUT, 0, 0);
