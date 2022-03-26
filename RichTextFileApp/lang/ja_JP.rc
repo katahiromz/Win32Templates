@@ -51,6 +51,7 @@ IDR_MAINMENU MENU
     POPUP "表示(&V)"
     {
         MENUITEM "ツールバー(&T)", ID_TOOLBAR
+        MENUITEM "ツールバー &2", ID_TOOLBAR2
         MENUITEM "ステータスバー(&S)", ID_STATUSBAR
     }
     POPUP "ヘルプ(&H)"

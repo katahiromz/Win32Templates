@@ -51,6 +51,7 @@ IDR_MAINMENU MENU
     POPUP "&View"
     {
         MENUITEM "&Toolbar", ID_TOOLBAR
+        MENUITEM "Toolbar &2", ID_TOOLBAR2
         MENUITEM "&Status Bar", ID_STATUSBAR
     }
     POPUP "&Help"

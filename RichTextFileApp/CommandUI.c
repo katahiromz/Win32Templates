@@ -124,6 +124,7 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     enableCommand(ID_HELP, FALSE, hMenu);
     enableCommand(ID_PAGESETUP, FALSE, hMenu);
     checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbars[0]), hMenu);
+    checkCommand(ID_TOOLBAR2, IsWindowVisible(g_hToolbars[1]), hMenu);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     //hideCommand(ID_REDO, hMenu);
 }

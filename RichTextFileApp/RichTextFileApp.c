@@ -36,6 +36,7 @@ typedef struct PROFILE
     INT nWindowCX;
     INT nWindowCY;
     BOOL bShowToolbar;
+    BOOL bShowToolbar2;
     BOOL bShowStatusBar;
     BOOL bMaximized;
     PRECENT pRecent;
@@ -55,6 +56,7 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowCX", pProfile->nWindowCX, 600);
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
     LOAD_INT("Settings", "ShowToolbar", pProfile->bShowToolbar, TRUE);
+    LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbar2, TRUE);
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
     LOAD_INT("Settings", "Maximized", pProfile->bMaximized, FALSE);
 #undef LOAD_INT
@@ -73,6 +75,7 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowCX", pProfile->nWindowCX);
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
     SAVE_INT("Settings", "ShowToolbar", pProfile->bShowToolbar);
+    SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbar2);
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
     SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
 #undef SAVE_INT
@@ -320,6 +323,17 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
         SendMessage(g_hRebar, RB_SHOWBAND, 0, FALSE);
     }
 
+    if (g_profile.bShowToolbar2)
+    {
+        ShowWindow(g_hToolbars[1], SW_SHOWNOACTIVATE);
+        SendMessage(g_hRebar, RB_SHOWBAND, 1, TRUE);
+    }
+    else
+    {
+        ShowWindow(g_hToolbars[1], SW_HIDE);
+        SendMessage(g_hRebar, RB_SHOWBAND, 1, FALSE);
+    }
+
     if (g_profile.bShowStatusBar)
     {
         ShowWindow(g_hStatusBar, SW_SHOWNOACTIVATE);
@@ -421,6 +435,20 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
             SendMessage(g_hRebar, RB_SHOWBAND, 0, TRUE);
         }
         g_profile.bShowToolbar = IsWindowVisible(g_hToolbars[0]);
+        PostMessage(hwnd, WM_SIZE, 0, 0);
+        break;
+    case ID_TOOLBAR2:
+        if (IsWindowVisible(g_hToolbars[1]))
+        {
+            ShowWindow(g_hToolbars[1], SW_HIDE);
+            SendMessage(g_hRebar, RB_SHOWBAND, 1, FALSE);
+        }
+        else
+        {
+            ShowWindow(g_hToolbars[1], SW_SHOWNOACTIVATE);
+            SendMessage(g_hRebar, RB_SHOWBAND, 1, TRUE);
+        }
+        g_profile.bShowToolbar2 = IsWindowVisible(g_hToolbars[1]);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_UNDO:

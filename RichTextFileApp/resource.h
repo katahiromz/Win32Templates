@@ -75,6 +75,7 @@
 #define ID_HELP                             120
 #define ID_SELECTALL                        121
 #define ID_PAGESETUP                        122
+#define ID_TOOLBAR2                         123
 #define ID_RECENT_01                        201
 #define ID_RECENT_02                        202
 #define ID_RECENT_03                        203
