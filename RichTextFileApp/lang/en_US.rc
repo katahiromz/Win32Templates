@@ -147,6 +147,9 @@ STRINGTABLE
     IDS_TOOL_TOOLBAR2, "Toolbar|Toggles the display of the toolbar."
     IDS_TOOL_TOOLBAR3, "Toolbar|Toggles the display of the toolbar."
     IDS_TOOL_TOOLBAR4, "Toolbar|Toggles the display of the toolbar."
+    IDS_TOOL_BACK, "Back|Goes back one step from the current position."
+    IDS_TOOL_FORWARD, "Forward|Go one step from the current position."
+    IDS_TOOL_FAVORITE, "Favorite|Opens your favorites."
 }
 
 //////////////////////////////////////////////////////////////////////////////

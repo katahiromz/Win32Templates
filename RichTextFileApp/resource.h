@@ -58,6 +58,9 @@
 #define IDS_TOOL_TOOLBAR2                   137
 #define IDS_TOOL_TOOLBAR3                   138
 #define IDS_TOOL_TOOLBAR4                   139
+#define IDS_TOOL_BACK                       140
+#define IDS_TOOL_FORWARD                    141
+#define IDS_TOOL_FAVORITE                   142
 
 #define ID_EXIT                             100
 #define ID_ABOUT                            101
@@ -85,6 +88,9 @@
 #define ID_TOOLBAR2                         124
 #define ID_TOOLBAR3                         125
 #define ID_TOOLBAR4                         126
+#define ID_BACK                             127
+#define ID_FORWARD                          128
+#define ID_FAVORITE                         129
 #define ID_RECENT_01                        201
 #define ID_RECENT_02                        202
 #define ID_RECENT_03                        203

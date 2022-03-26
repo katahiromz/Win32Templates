@@ -296,10 +296,9 @@ HWND doCreateToolbar2(HWND hwnd, INT index)
     static TBBUTTON buttons[] =
     {
         // { image index, command id, button state, BTNS_, ... }
-        { HIST_BACK, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
-        { HIST_FORWARD, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
-        { HIST_FAVORITES, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
-        { HIST_VIEWTREE, -1, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_BACK, ID_BACK, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_FORWARD, ID_FORWARD, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
+        { HIST_FAVORITES, ID_FAVORITE, TBSTATE_ENABLED, BTNS_BUTTON | BTNS_AUTOSIZE },
     };
     size_t i, k;
     LPTSTR text;
@@ -311,7 +310,7 @@ HWND doCreateToolbar2(HWND hwnd, INT index)
     }
 
     // TODO: Create hwndToolbar
-    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS;
+    style = WS_CHILD | CCS_TOP | TBS_HORZ | TBS_TOOLTIPS | CCS_NORESIZE;
     if (bHasRebar)
         style |= CCS_NORESIZE | CCS_NODIVIDER;
     if (bList && bAddString)

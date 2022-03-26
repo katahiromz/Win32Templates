@@ -463,6 +463,11 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
             updateModified(TRUE);
         }
         break;
+    case ID_BACK:
+    case ID_FORWARD:
+    case ID_FAVORITE:
+        ASSERT(!"Not implemented yet!");
+        break;
     default:
         if (ID_RECENT_01 <= id && id <= ID_RECENT_20)
         {
