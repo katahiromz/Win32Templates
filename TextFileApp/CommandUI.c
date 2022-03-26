@@ -197,14 +197,14 @@ BOOL doCreateToolbar(HWND hwnd)
             TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_LARGE_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_LARGE_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_HIST_LARGE_COLOR };
-            SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
+            SendMessage(g_hToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
         }
         else
         {
             TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_STD_SMALL_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_VIEW_SMALL_COLOR };
             //TBADDBITMAP AddBitmap = { HINST_COMMCTRL, IDB_HIST_SMALL_COLOR };
-            SendMessage(g_hToolbar, TB_ADDBITMAP, 3, (LPARAM)&AddBitmap);
+            SendMessage(g_hToolbar, TB_ADDBITMAP, 0, (LPARAM)&AddBitmap);
         }
 
         SendMessage(g_hToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
