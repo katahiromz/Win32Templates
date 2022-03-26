@@ -463,16 +463,28 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         SendMessage(g_hCanvasWnd, EM_REDO, 0, 0);
         break;
     case ID_CUT:
-        SendMessage(g_hCanvasWnd, WM_CUT, 0, 0);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, WM_CUT, 0, 0);
+        else
+            SendMessage(GetFocus(), WM_CUT, 0, 0);
         break;
     case ID_COPY:
-        SendMessage(g_hCanvasWnd, WM_COPY, 0, 0);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, WM_COPY, 0, 0);
+        else
+            SendMessage(GetFocus(), WM_COPY, 0, 0);
         break;
     case ID_PASTE:
-        SendMessage(g_hCanvasWnd, WM_PASTE, 0, 0);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, WM_PASTE, 0, 0);
+        else
+            SendMessage(GetFocus(), WM_PASTE, 0, 0);
         break;
     case ID_DELETE:
-        SendMessage(g_hCanvasWnd, WM_CLEAR, 0, 0);
+        if (GetFocus() == g_hCanvasWnd)
+            SendMessage(g_hCanvasWnd, WM_CLEAR, 0, 0);
+        else
+            SendMessage(GetFocus(), WM_CLEAR, 0, 0);
         break;
     case ID_PRINTPREVIEW:
     case ID_PRINT:
