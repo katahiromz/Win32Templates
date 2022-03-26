@@ -6,7 +6,7 @@
 HINSTANCE   g_hInstance       = NULL; // module handle
 HWND        g_hMainWnd        = NULL; // main window
 HWND        g_hCanvasWnd      = NULL; // IDW_CANVAS
-HWND        g_hToolbars[DX_APP_NUM_TOOLBARS] = { NULL }; // IDW_TOOLBAR1, IDW_TOOLBAR2
+HWND        g_hToolbars[DX_APP_NUM_TOOLBARS] = { NULL }; // IDW_TOOLBAR1, IDW_TOOLBAR2, ...
 HWND        g_hRebar          = NULL; // IDW_REBAR
 HWND        g_hStatusBar      = NULL; // IDW_STATUSBAR
 HACCEL      g_hAccel          = NULL; // IDR_ACCEL
@@ -46,7 +46,10 @@ PROFILE g_profile;
 
 BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
 {
-    doSetRegistryKey(DX_APP_COMPANY_NAME_IN_ENGLISH);
+    if (DX_APP_USE_REGISTRY)
+    {
+        doSetRegistryKey(DX_APP_COMPANY_NAME_IN_ENGLISH);
+    }
 
 #define LOAD_INT(section, name, var, defvalue) do { \
     (var) = loadProfileInt(TEXT(section), TEXT(name), defvalue); \

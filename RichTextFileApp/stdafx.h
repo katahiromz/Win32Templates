@@ -11,6 +11,7 @@
 #define DX_APP_NAME_IN_ENGLISH          TEXT("RichTextFileApp")
 #define DX_APP_MAINWND_CLASSNAME        TEXT("RichTextFileApp by katahiromz")
 #define DX_APP_NUM_TOOLBARS             2
+#define DX_APP_USE_REGISTRY             TRUE
 
 // The window IDs
 #define IDW_CANVAS edt1

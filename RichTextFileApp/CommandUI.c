@@ -8,8 +8,7 @@ extern HWND g_hStatusBar;
 
 static HFONT s_hCanvasFont = NULL;
 
-static HIMAGELIST s_himlToolbar = NULL;
-static HIMAGELIST s_himlToolbar2 = NULL;
+static HIMAGELIST s_himlToolbars[DX_APP_NUM_TOOLBARS] = { NULL };
 
 ///////////////////////////////////////////////////////////////////////////////
 // COMMAND UI
@@ -144,7 +143,7 @@ void showToolbar(INT index, BOOL bShow)
 ///////////////////////////////////////////////////////////////////////////////
 // CONTROLS
 
-HWND doCreateToolbar(HWND hwnd)
+HWND doCreateToolbar1(HWND hwnd, INT index)
 {
     HWND hwndToolbar = NULL;
     DWORD style, exstyle;
@@ -250,24 +249,24 @@ HWND doCreateToolbar(HWND hwnd)
 
         if (bUseLargeButtons)
         {
-            idBitmap = IDB_LARGETOOLBAR;
+            idBitmap = IDB_LARGETOOLBAR1;
             nButtonImageWidth = nButtonImageHeight = 24;
         }
         else
         {
-            idBitmap = IDB_SMALLTOOLBAR;
+            idBitmap = IDB_SMALLTOOLBAR1;
             nButtonImageWidth = nButtonImageHeight = 16;
         }
 
         SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
-        s_himlToolbar = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                            nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
-                                            LR_CREATEDIBSECTION);
-        if (!s_himlToolbar)
+        s_himlToolbars[index] = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+                                                    nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
+                                                    LR_CREATEDIBSECTION);
+        if (!s_himlToolbars[index])
             return NULL;
 
-        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar);
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbars[index]);
         SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
 
@@ -284,7 +283,7 @@ HWND doCreateToolbar(HWND hwnd)
     return hwndToolbar;
 }
 
-HWND doCreateToolbar2(HWND hwnd)
+HWND doCreateToolbar2(HWND hwnd, INT index)
 {
     HWND hwndToolbar = NULL;
     DWORD style, exstyle;
@@ -362,13 +361,13 @@ HWND doCreateToolbar2(HWND hwnd)
 
         SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
 
-        s_himlToolbar2 = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                             nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
-                                             LR_CREATEDIBSECTION);
-        if (!s_himlToolbar2)
+        s_himlToolbars[index] = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+                                                    nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
+                                                    LR_CREATEDIBSECTION);
+        if (!s_himlToolbars[index])
             return NULL;
 
-        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbar2);
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbars[index]);
         SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
     }
 
@@ -399,11 +398,11 @@ BOOL doCreateRebar(HWND hwnd)
         SendMessage(g_hRebar, RB_SETBARINFO, 0, (LPARAM)&info);
     }
 
-    g_hToolbars[0] = doCreateToolbar(g_hRebar);
+    g_hToolbars[0] = doCreateToolbar1(g_hRebar, 0);
     if (!g_hToolbars[0])
         return FALSE;
 
-    g_hToolbars[1] = doCreateToolbar2(g_hRebar);
+    g_hToolbars[1] = doCreateToolbar2(g_hRebar, 1);
     if (!g_hToolbars[1])
         return FALSE;
 
@@ -479,25 +478,17 @@ void destroyControls(HWND hwnd)
 {
     DestroyWindow(g_hCanvasWnd);
 
-    {
-        size_t i;
-        for (i = 0; i < _countof(g_hToolbars); ++i)
-            DestroyWindow(g_hToolbars[i]);
-    }
+    ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+        DestroyWindow(hwndTB);
+    });
 
     DestroyWindow(g_hRebar);
     DestroyWindow(g_hStatusBar);
 
-    if (s_himlToolbar)
-    {
-        ImageList_Destroy(s_himlToolbar);
-        s_himlToolbar = NULL;
-    }
-    if (s_himlToolbar2)
-    {
-        ImageList_Destroy(s_himlToolbar2);
-        s_himlToolbar2 = NULL;
-    }
+    ARRAY_FOREACH(HIMAGELIST himl, s_himlToolbars, {
+        ImageList_Destroy(himl);
+    });
+
     if (s_hCanvasFont)
     {
         DeleteObject(s_hCanvasFont);
