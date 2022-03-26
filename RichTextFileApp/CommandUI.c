@@ -71,11 +71,9 @@ LPTSTR getCommandText(INT id, BOOL bDetail)
 
 static void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
 {
-    {
-        size_t i;
-        for (i = 0; i < _countof(g_hToolbars); ++i)
-            SendMessage(g_hToolbars[i], TB_ENABLEBUTTON, id, bEnabled);
-    }
+    ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+        SendMessage(hwndTB, TB_ENABLEBUTTON, id, bEnabled);
+    });
 
     if (bEnabled)
         EnableMenuItem(hMenu, id, MF_ENABLED);
@@ -85,11 +83,9 @@ static void enableCommand(INT id, BOOL bEnabled, HMENU hMenu)
 
 static void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 {
-    {
-        size_t i;
-        for (i = 0; i < _countof(g_hToolbars); ++i)
-            SendMessage(g_hToolbars[i], TB_CHECKBUTTON, id, bChecked);
-    }
+    ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+        SendMessage(hwndTB, TB_CHECKBUTTON, id, bChecked);
+    });
 
     if (bChecked)
         CheckMenuItem(hMenu, id, MF_CHECKED);
@@ -99,11 +95,9 @@ static void checkCommand(INT id, BOOL bChecked, HMENU hMenu)
 
 static void hideCommand(INT id, HMENU hMenu)
 {
-    {
-        size_t i;
-        for (i = 0; i < _countof(g_hToolbars); ++i)
-            SendMessage(g_hToolbars[i], TB_HIDEBUTTON, id, TRUE);
-    }
+    ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+        SendMessage(hwndTB, TB_HIDEBUTTON, id, TRUE);
+    });
 
     DeleteMenu(hMenu, id, MF_BYCOMMAND);
 }
@@ -123,10 +117,11 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     enableCommand(ID_REPLACE, FALSE, hMenu);
     enableCommand(ID_HELP, FALSE, hMenu);
     enableCommand(ID_PAGESETUP, FALSE, hMenu);
-    checkCommand(ID_TOOLBAR, IsWindowVisible(g_hToolbars[0]), hMenu);
+    checkCommand(ID_TOOLBAR1, IsWindowVisible(g_hToolbars[0]), hMenu);
     checkCommand(ID_TOOLBAR2, IsWindowVisible(g_hToolbars[1]), hMenu);
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
-    //hideCommand(ID_REDO, hMenu);
+    hideCommand(ID_TOOLBAR3, hMenu);
+    hideCommand(ID_TOOLBAR4, hMenu);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -395,23 +390,18 @@ BOOL doCreateRebar(HWND hwnd)
     if (!g_hToolbars[1])
         return FALSE;
 
-    {
-        size_t i;
-        for (i = 0; i < _countof(g_hToolbars); ++i)
-        {
-            SIZE siz;
-            REBARBANDINFO band = { sizeof(band) };
-            HWND hwndTB = g_hToolbars[i];
-            SendMessage(hwndTB, TB_GETMAXSIZE, 0, (LPARAM)&siz);
-            band.fMask = RBBIM_STYLE | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
-            band.hwndChild = hwndTB;
-            band.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
-            band.cxMinChild = siz.cx;
-            band.cyMinChild = siz.cy;
-            band.cx = siz.cx;
-            SendMessage(g_hRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&band);
-        }
-    }
+    ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+        SIZE siz;
+        REBARBANDINFO band = { sizeof(band) };
+        SendMessage(hwndTB, TB_GETMAXSIZE, 0, (LPARAM)&siz);
+        band.fMask = RBBIM_STYLE | RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_SIZE;
+        band.hwndChild = hwndTB;
+        band.fStyle = RBBS_CHILDEDGE | RBBS_GRIPPERALWAYS;
+        band.cxMinChild = siz.cx;
+        band.cyMinChild = siz.cy;
+        band.cx = siz.cx;
+        SendMessage(g_hRebar, RB_INSERTBAND, (WPARAM)-1, (LPARAM)&band);
+    });
 
     return TRUE;
 }

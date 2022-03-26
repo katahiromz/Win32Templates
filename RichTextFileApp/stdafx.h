@@ -8,8 +8,8 @@
 // TODO: Modify if necessary
 #define DX_APP_MAX_RECENTS              20
 #define DX_APP_COMPANY_NAME_IN_ENGLISH  TEXT("Katayama Hirofumi MZ")
-#define DX_APP_NAME_IN_ENGLISH          TEXT("TextFileApp")
-#define DX_APP_MAINWND_CLASSNAME        TEXT("TextFileApp by katahiromz")
+#define DX_APP_NAME_IN_ENGLISH          TEXT("RichTextFileApp")
+#define DX_APP_MAINWND_CLASSNAME        TEXT("RichTextFileApp by katahiromz")
 #define DX_APP_NUM_TOOLBARS             2
 
 // The window IDs

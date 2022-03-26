@@ -53,6 +53,14 @@ void ShutDownDx(BOOL bForce);
 
 DWORD GetComCtl32VersionDx(VOID);
 
+#define ARRAY_FOREACH(TYPE_var, array, block) do { \
+    size_t ARRAY_FOREACH_##__LINE__ = 0; \
+    for (; ARRAY_FOREACH_##__LINE__ < _countof(array); ++ARRAY_FOREACH_##__LINE__) { \
+        TYPE_var = array[ARRAY_FOREACH_##__LINE__]; \
+        block \
+    } \
+} while (0)
+
 #ifdef __cplusplus
 }
 #endif

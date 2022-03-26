@@ -50,8 +50,10 @@ IDR_MAINMENU MENU
     }
     POPUP "表示(&V)"
     {
-        MENUITEM "ツールバー(&T)", ID_TOOLBAR
+        MENUITEM "ツールバー(&T)", ID_TOOLBAR1
         MENUITEM "ツールバー &2", ID_TOOLBAR2
+        MENUITEM "ツールバー &3", ID_TOOLBAR3
+        MENUITEM "ツールバー &4", ID_TOOLBAR4
         MENUITEM "ステータスバー(&S)", ID_STATUSBAR
     }
     POPUP "ヘルプ(&H)"
@@ -87,10 +89,10 @@ FILETYPE        0x1
         BLOCK "041103A4"
         {
             VALUE "CompanyName", "私の会社\0"
-            VALUE "FileDescription", "FileApp\0"
+            VALUE "FileDescription", "RichTextFileApp\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 私の会社. All rights reserved.\0"
-            VALUE "ProductName", "FileApp\0"
+            VALUE "ProductName", "RichTextFileApp\0"
             VALUE "ProductVersion", "0.0\0"
         }
     }
@@ -137,10 +139,13 @@ STRINGTABLE
     IDS_TOOL_PAGESETUP, "ページ設定|印刷ページの設定を行います。"
     IDS_TOOL_SAVEAS, "名前を付けて保存|現在のファイルに名前を付けて保存します。"
     IDS_TOOL_STATUSBAR, "ステータスバー|ステータスバーの表示を切り替えます。"
-    IDS_TOOL_TOOLBAR, "ツールバー|ツールバーの表示を切り替えます。"
     IDS_TOOL_RECENT, "最近使ったファイル|最近使ったファイルを開きます。"
     IDS_TOOL_EXIT, "終了|このアプリを終了します。"
     IDS_TOOL_ABOUT, "バージョン情報|このアプリのバージョン情報を表示します。"
+    IDS_TOOL_TOOLBAR1, "ツールバー|ツールバーの表示を切り替えます。"
+    IDS_TOOL_TOOLBAR2, "ツールバー|ツールバーの表示を切り替えます。"
+    IDS_TOOL_TOOLBAR3, "ツールバー|ツールバーの表示を切り替えます。"
+    IDS_TOOL_TOOLBAR4, "ツールバー|ツールバーの表示を切り替えます。"
 }
 
 //////////////////////////////////////////////////////////////////////////////

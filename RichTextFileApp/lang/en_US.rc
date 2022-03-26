@@ -50,8 +50,11 @@ IDR_MAINMENU MENU
     }
     POPUP "&View"
     {
-        MENUITEM "&Toolbar", ID_TOOLBAR
+        MENUITEM "&Toolbar", ID_TOOLBAR1
         MENUITEM "Toolbar &2", ID_TOOLBAR2
+        MENUITEM "Toolbar &3", ID_TOOLBAR3
+        MENUITEM "Toolbar &4", ID_TOOLBAR4
+        MENUITEM SEPARATOR
         MENUITEM "&Status Bar", ID_STATUSBAR
     }
     POPUP "&Help"
@@ -87,10 +90,10 @@ FILETYPE        0x1
         BLOCK "040904E4"
         {
             VALUE "CompanyName", "My Company\0"
-            VALUE "FileDescription", "FileApp\0"
+            VALUE "FileDescription", "RichTextFileApp\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "LegalCopyright", "Copyright (C) 2017 My Company. All rights reserved.\0"
-            VALUE "ProductName", "FileApp\0"
+            VALUE "ProductName", "RichTextFileApp\0"
             VALUE "ProductVersion", "0.0\0"
         }
     }
@@ -137,10 +140,13 @@ STRINGTABLE
     IDS_TOOL_PAGESETUP, "Page Setup|Setups the printing pages."
     IDS_TOOL_SAVEAS, "Save As|Saves the current file with the specified filename."
     IDS_TOOL_STATUSBAR, "Status Bar|Toggles the display of the status bar."
-    IDS_TOOL_TOOLBAR, "Toolbar|Toggles the display of the toolbar."
     IDS_TOOL_RECENT, "Recent|Opens a recently used file."
     IDS_TOOL_EXIT, "Exit|Terminates this application."
     IDS_TOOL_ABOUT, "About|Show the version info of this application."
+    IDS_TOOL_TOOLBAR1, "Toolbar|Toggles the display of the toolbar."
+    IDS_TOOL_TOOLBAR2, "Toolbar|Toggles the display of the toolbar."
+    IDS_TOOL_TOOLBAR3, "Toolbar|Toggles the display of the toolbar."
+    IDS_TOOL_TOOLBAR4, "Toolbar|Toggles the display of the toolbar."
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -35,8 +35,7 @@ typedef struct PROFILE
     INT nWindowY;
     INT nWindowCX;
     INT nWindowCY;
-    BOOL bShowToolbar;
-    BOOL bShowToolbar2;
+    BOOL bShowToolbars[DX_APP_NUM_TOOLBARS];
     BOOL bShowStatusBar;
     BOOL bMaximized;
     PRECENT pRecent;
@@ -55,8 +54,10 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "WindowY", pProfile->nWindowY, CW_USEDEFAULT);
     LOAD_INT("Settings", "WindowCX", pProfile->nWindowCX, 600);
     LOAD_INT("Settings", "WindowCY", pProfile->nWindowCY, 400);
-    LOAD_INT("Settings", "ShowToolbar", pProfile->bShowToolbar, TRUE);
-    LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbar2, TRUE);
+    LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
+    LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
+    //LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE); // TODO:
+    //LOAD_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3], TRUE); // TODO:
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
     LOAD_INT("Settings", "Maximized", pProfile->bMaximized, FALSE);
 #undef LOAD_INT
@@ -74,8 +75,10 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "WindowY", pProfile->nWindowY);
     SAVE_INT("Settings", "WindowCX", pProfile->nWindowCX);
     SAVE_INT("Settings", "WindowCY", pProfile->nWindowCY);
-    SAVE_INT("Settings", "ShowToolbar", pProfile->bShowToolbar);
-    SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbar2);
+    SAVE_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0]);
+    SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
+    //SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]); // TODO:
+    //SAVE_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3]); // TODO:
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
     SAVE_INT("Settings", "Maximized", pProfile->bMaximized);
 #undef SAVE_INT
@@ -312,26 +315,16 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
     if (!createControls(hwnd))
         return FALSE;
 
-    if (g_profile.bShowToolbar)
     {
-        ShowWindow(g_hToolbars[0], SW_SHOWNOACTIVATE);
-        SendMessage(g_hRebar, RB_SHOWBAND, 0, TRUE);
-    }
-    else
-    {
-        ShowWindow(g_hToolbars[0], SW_HIDE);
-        SendMessage(g_hRebar, RB_SHOWBAND, 0, FALSE);
-    }
-
-    if (g_profile.bShowToolbar2)
-    {
-        ShowWindow(g_hToolbars[1], SW_SHOWNOACTIVATE);
-        SendMessage(g_hRebar, RB_SHOWBAND, 1, TRUE);
-    }
-    else
-    {
-        ShowWindow(g_hToolbars[1], SW_HIDE);
-        SendMessage(g_hRebar, RB_SHOWBAND, 1, FALSE);
+        INT index = 0;
+        ARRAY_FOREACH(HWND hwndTB, g_hToolbars, {
+            if (g_profile.bShowToolbars[index])
+            {
+                ShowWindow(hwndTB, SW_SHOWNOACTIVATE);
+                SendMessage(g_hRebar, RB_SHOWBAND, index, TRUE);
+            }
+            ++index;
+        });
     }
 
     if (g_profile.bShowStatusBar)
@@ -423,33 +416,28 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         g_profile.bShowStatusBar = IsWindowVisible(g_hStatusBar);
         PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
-    case ID_TOOLBAR:
-        if (IsWindowVisible(g_hToolbars[0]))
-        {
-            ShowWindow(g_hToolbars[0], SW_HIDE);
-            SendMessage(g_hRebar, RB_SHOWBAND, 0, FALSE);
-        }
-        else
-        {
-            ShowWindow(g_hToolbars[0], SW_SHOWNOACTIVATE);
-            SendMessage(g_hRebar, RB_SHOWBAND, 0, TRUE);
-        }
-        g_profile.bShowToolbar = IsWindowVisible(g_hToolbars[0]);
-        PostMessage(hwnd, WM_SIZE, 0, 0);
-        break;
+    case ID_TOOLBAR1:
     case ID_TOOLBAR2:
-        if (IsWindowVisible(g_hToolbars[1]))
+    case ID_TOOLBAR3:
+    case ID_TOOLBAR4:
         {
-            ShowWindow(g_hToolbars[1], SW_HIDE);
-            SendMessage(g_hRebar, RB_SHOWBAND, 1, FALSE);
+            INT index = id - ID_TOOLBAR1;
+            if (index < DX_APP_NUM_TOOLBARS)
+            {
+                if (IsWindowVisible(g_hToolbars[index]))
+                {
+                    ShowWindow(g_hToolbars[index], SW_HIDE);
+                    SendMessage(g_hRebar, RB_SHOWBAND, index, FALSE);
+                }
+                else
+                {
+                    ShowWindow(g_hToolbars[index], SW_SHOWNOACTIVATE);
+                    SendMessage(g_hRebar, RB_SHOWBAND, index, TRUE);
+                }
+                g_profile.bShowToolbars[index] = IsWindowVisible(g_hToolbars[index]);
+                PostMessage(hwnd, WM_SIZE, 0, 0);
+            }
         }
-        else
-        {
-            ShowWindow(g_hToolbars[1], SW_SHOWNOACTIVATE);
-            SendMessage(g_hRebar, RB_SHOWBAND, 1, TRUE);
-        }
-        g_profile.bShowToolbar2 = IsWindowVisible(g_hToolbars[1]);
-        PostMessage(hwnd, WM_SIZE, 0, 0);
         break;
     case ID_UNDO:
         Edit_Undo(g_hCanvasWnd);
