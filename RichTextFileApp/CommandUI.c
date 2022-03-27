@@ -155,7 +155,7 @@ void loadMenuBitmaps(HMENU hMenu)
 
         id = GetMenuItemID(hMenu, i);
         info = findCommand(id);
-        if (!info)
+        if (!info || info->hbmIcon)
             continue;
         if (info->iImageList == -1 || info->iIcon == -1)
             continue;
@@ -733,7 +733,10 @@ void destroyControls(HWND hwnd)
 #ifndef DX_APP_NEED_DIET
     ARRAY_FOREACH(CommandUI ui, s_CommandUI, {
         if (ui.hbmIcon)
+        {
             DeleteObject(ui.hbmIcon);
+            ui.hbmIcon = NULL;
+        }
     });
 #endif
 
@@ -742,7 +745,7 @@ void destroyControls(HWND hwnd)
 
     {
         size_t i;
-        for (i = 0; i < 2; ++i)
+        for (i = 0; i < _countof(s_himls); ++i)
         {
             ARRAY_FOREACH(HIMAGELIST himl, s_himls[i], {
                 ImageList_Destroy(himl);
