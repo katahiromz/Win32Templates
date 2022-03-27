@@ -61,10 +61,10 @@ BOOL loadProfile(PPROFILE pProfile, INT nMaxRecents)
     LOAD_INT("Settings", "ShowToolbar1", pProfile->bShowToolbars[0], TRUE);
     LOAD_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1], TRUE);
 #ifdef DX_APP_USE_TEST_CTRLS
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+    static_assert(DX_APP_NUM_TOOLBARS == 3, "TODO:");
     LOAD_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2], TRUE);
 #else
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    static_assert(DX_APP_NUM_TOOLBARS == 2, "TODO:");
 #endif
     //LOAD_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3], TRUE); // TODO:
     LOAD_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar, TRUE);
@@ -88,9 +88,9 @@ BOOL saveProfile(const PROFILE *pProfile)
     SAVE_INT("Settings", "ShowToolbar2", pProfile->bShowToolbars[1]);
 #ifdef DX_APP_USE_TEST_CTRLS
     SAVE_INT("Settings", "ShowToolbar3", pProfile->bShowToolbars[2]);
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+    static_assert(DX_APP_NUM_TOOLBARS == 3, "TODO:");
 #else
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    static_assert(DX_APP_NUM_TOOLBARS == 2, "TODO:");
 #endif
     //SAVE_INT("Settings", "ShowToolbar4", pProfile->bShowToolbars[3]); // TODO:
     SAVE_INT("Settings", "ShowStatusBar", pProfile->bShowStatusBar);
@@ -652,12 +652,16 @@ void OnDestroy(HWND hwnd)
     PostQuitMessage(0);
 }
 
-void OnInitMenu(HWND hwnd, HMENU hMenu)
+HMENU getRecentMenu(HWND hwnd)
 {
-    INT i, nRecentCount = Recent_GetCount(g_profile.pRecent);
     HMENU hFileMenu = GetSubMenu(GetMenu(hwnd), 0);
     INT nFileMenuCount = GetMenuItemCount(hFileMenu);
-    HMENU hRecentMenu = GetSubMenu(hFileMenu, nFileMenuCount - 3);
+    return GetSubMenu(hFileMenu, nFileMenuCount - 3);
+}
+
+void updateRecentMenu(HMENU hRecentMenu)
+{
+    INT i, nRecentCount = Recent_GetCount(g_profile.pRecent);
     LPCTSTR pszRecent;
     TCHAR szText[MAX_PATH];
 
@@ -679,8 +683,14 @@ void OnInitMenu(HWND hwnd, HMENU hMenu)
     {
         AppendMenu(hRecentMenu, MF_STRING | MF_GRAYED, 0, LoadStringDx(IDS_NONE));
     }
+}
 
+void OnInitMenuPopup(HWND hwnd, HMENU hMenu, UINT item, BOOL fSystemMenu)
+{
+    HMENU hRecentMenu = getRecentMenu(hwnd);
+    updateRecentMenu(hRecentMenu);
     updateCommandUI(hwnd, hMenu);
+    DrawMenuBar(hwnd);
 }
 
 LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
@@ -689,6 +699,15 @@ LRESULT OnNotify(HWND hwnd, int idFrom, LPNMHDR pnmhdr)
 
     switch (pnmhdr->code)
     {
+    case EN_MSGFILTER:
+        {
+            MSGFILTER *pFilter = (MSGFILTER *)pnmhdr;
+            if (pFilter->msg == WM_RBUTTONDOWN)
+            {
+                // TODO: Show context menu
+            }
+        }
+        break;
     case RBN_AUTOSIZE:
         rearrangeControls(hwnd, TRUE);
         break;
@@ -728,7 +747,7 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         HANDLE_MSG(hwnd, WM_PAINT, OnPaint);
         HANDLE_MSG(hwnd, WM_MOVE, OnMove);
         HANDLE_MSG(hwnd, WM_SIZE, OnSize);
-        HANDLE_MSG(hwnd, WM_INITMENU, OnInitMenu);
+        HANDLE_MSG(hwnd, WM_INITMENUPOPUP, OnInitMenuPopup);
         HANDLE_MSG(hwnd, WM_CLOSE, OnClose);
         HANDLE_MSG(hwnd, WM_DESTROY, OnDestroy);
     case WM_MENUSELECT:

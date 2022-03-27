@@ -8,7 +8,14 @@ extern HWND g_hStatusBar;
 
 static HFONT s_hCanvasFont = NULL;
 
-static HIMAGELIST s_himlToolbars[DX_APP_NUM_TOOLBARS] = { NULL };
+#define IHIML_SMALL 0
+#define IHIML_LARGE 1
+static HIMAGELIST s_himls[2][DX_APP_NUM_TOOLBARS] = { NULL };
+static SIZE s_sizImageSize[2] = {
+    { 16, 16 }, // IHIML_SMALL
+    { 24, 24 }, // IHIML_LARGE
+};
+#define rgbMaskColor RGB(255, 0, 255)
 
 #ifdef DX_APP_USE_TEST_CTRLS
     HWND g_hwndTestCtrls[DX_APP_USE_TEST_CTRLS];
@@ -17,17 +24,30 @@ static HIMAGELIST s_himlToolbars[DX_APP_NUM_TOOLBARS] = { NULL };
 ///////////////////////////////////////////////////////////////////////////////
 // COMMAND UI
 
+// image list index
+#define IML_STD 0
+#define IML_HIST 1
+
 // a pair of command id and string id
 typedef struct CommandUI
 {
     INT id, ids;
+#ifndef DX_APP_NEED_DIET
+    INT iImageList; // IML_*
+    INT iIcon;
+    HBITMAP hbmIcon;
+#endif
 } CommandUI;
 
 // TODO: Add more entries...
 // NOTE: The resource string IDS_TOOL_... must be in form of "(command name)|(command description)".
 static CommandUI s_CommandUI[] =
 {
-#define DEFINE_COMMAND_UI(id, ids) { id, ids },
+#ifdef DX_APP_NEED_DIET
+#define DEFINE_COMMAND_UI(id, ids, iImageList, iIcon) { id, ids },
+#else
+#define DEFINE_COMMAND_UI(id, ids, iImageList, iIcon) { id, ids, iImageList, iIcon },
+#endif
 #include "CommandUI.dat"
 #undef DEFINE_COMMAND_UI
 };
@@ -35,8 +55,13 @@ static CommandUI s_CommandUI[] =
 void dumpCommandUI(void)
 {
     TRACEA("---[CommandUI.tsv]---(FROM HERE)---\n");
+#ifdef DX_APP_NEED_DIET
     TRACEA("%s\t%s\t%s\t%s\t%s\t%s\n", "(id)", "(id-dec)", "(id-hex)", "(ids)", "(ids-dec)", "(ids-hex)");
-#define DEFINE_COMMAND_UI(id, ids) TRACEA("%s\t%d\t0x%X\t%s\t%d\t0x%X\n", #id, id, id, #ids, ids, ids);
+#define DEFINE_COMMAND_UI(id, ids, iImageList, iIcon) TRACEA("%s\t%d\t0x%X\t%s\t%d\t0x%X\n", #id, id, id, #ids, ids, ids);
+#else
+    TRACEA("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", "(id)", "(id-dec)", "(id-hex)", "(ids)", "(ids-dec)", "(ids-hex)", "(image-list-index)", "(icon-index-in-image-list)");
+#define DEFINE_COMMAND_UI(id, ids, iImageList, iIcon) TRACEA("%s\t%d\t0x%X\t%s\t%d\t0x%X\t%d\t%d\n", #id, id, id, #ids, ids, ids, iImageList, iIcon);
+#endif
 #include "CommandUI.dat"
 #undef DEFINE_COMMAND_UI
     TRACEA("---[CommandUI.tsv]---(DOWN TO HERE)---\n");
@@ -105,6 +130,67 @@ static void hideCommand(INT id, HMENU hMenu)
     DeleteMenu(hMenu, id, MF_BYCOMMAND);
 }
 
+void loadMenuBitmaps(HMENU hMenu)
+{
+#ifndef DX_APP_NEED_DIET
+    INT i, id, nCount = GetMenuItemCount(hMenu);
+    MENUITEMINFO mii = { 
+        sizeof(mii), 
+        MIIM_FTYPE | MIIM_BITMAP | MIIM_CHECKMARKS
+    };
+    CommandUI *info;
+    INT cx, cy, cxyPadding = 2;
+    HBITMAP hbm;
+    HDC hdc;
+    HGDIOBJ hbmOld;
+    UINT uStyle;
+
+    hdc = CreateCompatibleDC(NULL);
+    for (i = 0; i < nCount; ++i)
+    {
+        if (!GetMenuItemInfo(hMenu, i, TRUE, &mii))
+            continue;
+        if ((mii.fType & MFT_SEPARATOR))
+            continue;
+
+        id = GetMenuItemID(hMenu, i);
+        info = findCommand(id);
+        if (!info)
+            continue;
+        if (info->iImageList == -1 || info->iIcon == -1)
+            continue;
+
+        //cx = GetSystemMetrics(SM_CXMENUCHECK);
+        //cy = GetSystemMetrics(SM_CYMENUCHECK);
+        cx = s_sizImageSize[IHIML_SMALL].cx;
+        cy = s_sizImageSize[IHIML_SMALL].cy;
+        //TRACEA("%d, %d\n", cx, cy);
+
+        hbm = Create24BppBitmapDx(cx + cxyPadding * 2, cy + cxyPadding * 2);
+        if (!hbm)
+            continue;
+
+        uStyle = ILD_NORMAL;
+
+        hbmOld = SelectObject(hdc, hbm);
+        {
+            SelectObject(hdc, GetStockBrush(WHITE_BRUSH));
+            SelectObject(hdc, GetStockPen(BLACK_PEN));
+            Rectangle(hdc, 0, 0, cx + cxyPadding * 2, cy + cxyPadding * 2);
+            ImageList_DrawEx(s_himls[IHIML_SMALL][info->iImageList], info->iIcon, 
+                hdc, cxyPadding, cxyPadding, cx, cy,
+                CLR_NONE, GetSysColor(COLOR_HIGHLIGHT), uStyle);
+        }
+        SelectObject(hdc, hbmOld);
+
+        info->hbmIcon = hbm;
+        mii.hbmpItem = hbm;
+        SetMenuItemInfo(hMenu, i, TRUE, &mii);
+    }
+    DeleteDC(hdc);
+#endif
+}
+
 void updateCommandUI(HWND hwnd, HMENU hMenu)
 {
     if (!hMenu)
@@ -125,14 +211,16 @@ void updateCommandUI(HWND hwnd, HMENU hMenu)
     checkCommand(ID_TOOLBAR1, IsWindowVisible(g_hToolbars[0]), hMenu);
     checkCommand(ID_TOOLBAR2, IsWindowVisible(g_hToolbars[1]), hMenu);
 #ifdef DX_APP_USE_TEST_CTRLS
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+    static_assert(DX_APP_NUM_TOOLBARS == 3, "TODO:");
     checkCommand(ID_TOOLBAR3, IsWindowVisible(g_hToolbars[2]), hMenu);
 #else
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    static_assert(DX_APP_NUM_TOOLBARS == 2, "TODO:");
 #endif
 
     checkCommand(ID_STATUSBAR, IsWindowVisible(g_hStatusBar), hMenu);
     hideCommand(ID_TOOLBAR4, hMenu);
+
+    loadMenuBitmaps(hMenu);
 }
 
 void showToolbar(INT index, BOOL bShow)
@@ -154,6 +242,51 @@ void showToolbar(INT index, BOOL bShow)
 
 ///////////////////////////////////////////////////////////////////////////////
 // CONTROLS
+
+BOOL doCreateImageLists(void)
+{
+    INT idBitmap;
+    HIMAGELIST himl;
+    BOOL bLarge;
+
+    bLarge = FALSE;
+    idBitmap = IDB_SMALLTOOLBAR1;
+    himl = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+        s_sizImageSize[bLarge].cx, 0, rgbMaskColor, IMAGE_BITMAP,
+        LR_CREATEDIBSECTION);
+    if (!himl)
+        return FALSE;
+    s_himls[bLarge][0] = himl;
+
+    bLarge = FALSE;
+    idBitmap = IDB_SMALLTOOLBAR2;
+    himl = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+        s_sizImageSize[bLarge].cx, 0, rgbMaskColor, IMAGE_BITMAP,
+        LR_CREATEDIBSECTION);
+    if (!himl)
+        return FALSE;
+    s_himls[bLarge][1] = himl;
+
+    bLarge = TRUE;
+    idBitmap = IDB_LARGETOOLBAR1;
+    himl = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+        s_sizImageSize[bLarge].cx, 0, rgbMaskColor, IMAGE_BITMAP,
+        LR_CREATEDIBSECTION);
+    if (!himl)
+        return FALSE;
+    s_himls[bLarge][0] = himl;
+
+    bLarge = TRUE;
+    idBitmap = IDB_LARGETOOLBAR2;
+    himl = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
+        s_sizImageSize[bLarge].cx, 0, rgbMaskColor, IMAGE_BITMAP,
+        LR_CREATEDIBSECTION);
+    if (!himl)
+        return FALSE;
+    s_himls[bLarge][1] = himl;
+
+    return TRUE;
+}
 
 HWND doCreateToolbar1(HWND hwnd, INT index, BOOL bHasRebar)
 {
@@ -253,31 +386,9 @@ HWND doCreateToolbar1(HWND hwnd, INT index, BOOL bHasRebar)
     }
     else // non-standard
     {
-        INT idBitmap, nButtonImageWidth, nButtonImageHeight;
-        // TODO: Change
-        COLORREF rgbMaskColor = RGB(255, 0, 255);
-        //COLORREF rgbMaskColor = CLR_NONE;
-
-        if (bUseLargeButtons)
-        {
-            idBitmap = IDB_LARGETOOLBAR1;
-            nButtonImageWidth = nButtonImageHeight = 24;
-        }
-        else
-        {
-            idBitmap = IDB_SMALLTOOLBAR1;
-            nButtonImageWidth = nButtonImageHeight = 16;
-        }
-
-        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
-
-        s_himlToolbars[index] = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                                    nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
-                                                    LR_CREATEDIBSECTION);
-        if (!s_himlToolbars[index])
-            return NULL;
-
-        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbars[index]);
+        SIZE siz = s_sizImageSize[bUseLargeButtons];
+        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(siz.cx, siz.cy));
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himls[bUseLargeButtons][index]);
     }
 
     SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
@@ -353,31 +464,9 @@ HWND doCreateToolbar2(HWND hwnd, INT index, BOOL bHasRebar)
     SendMessage(hwndToolbar, CCM_SETVERSION, 5, 0);
 
     {
-        INT idBitmap, nButtonImageWidth, nButtonImageHeight;
-        // TODO: Change
-        COLORREF rgbMaskColor = RGB(255, 0, 255);
-        //COLORREF rgbMaskColor = CLR_NONE;
-
-        if (bUseLargeButtons)
-        {
-            idBitmap = IDB_LARGETOOLBAR2;
-            nButtonImageWidth = nButtonImageHeight = 24;
-        }
-        else
-        {
-            idBitmap = IDB_SMALLTOOLBAR2;
-            nButtonImageWidth = nButtonImageHeight = 16;
-        }
-
-        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
-
-        s_himlToolbars[index] = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                                    nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
-                                                    LR_CREATEDIBSECTION);
-        if (!s_himlToolbars[index])
-            return NULL;
-
-        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbars[index]);
+        SIZE siz = s_sizImageSize[bUseLargeButtons];
+        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(siz.cx, siz.cy));
+        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himls[bUseLargeButtons][index]);
     }
 
     SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
@@ -488,35 +577,6 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
     // Enable multiple image lists
     SendMessage(hwndToolbar, CCM_SETVERSION, 5, 0);
 
-    if (0)
-    {
-        INT idBitmap, nButtonImageWidth, nButtonImageHeight;
-        // TODO: Change
-        COLORREF rgbMaskColor = RGB(255, 0, 255);
-        //COLORREF rgbMaskColor = CLR_NONE;
-
-        if (bUseLargeButtons)
-        {
-            idBitmap = IDB_LARGETOOLBAR2;
-            nButtonImageWidth = nButtonImageHeight = 24;
-        }
-        else
-        {
-            idBitmap = IDB_SMALLTOOLBAR2;
-            nButtonImageWidth = nButtonImageHeight = 16;
-        }
-
-        SendMessage(hwndToolbar, TB_SETBITMAPSIZE, 0, MAKELPARAM(nButtonImageWidth, nButtonImageHeight));
-
-        s_himlToolbars[index] = ImageList_LoadImage(g_hInstance, MAKEINTRESOURCE(idBitmap),
-                                                    nButtonImageWidth, 0, rgbMaskColor, IMAGE_BITMAP, 
-                                                    LR_CREATEDIBSECTION);
-        if (!s_himlToolbars[index])
-            return NULL;
-
-        SendMessage(hwndToolbar, TB_SETIMAGELIST, 0, (LPARAM)s_himlToolbars[index]);
-    }
-
     SendMessage(hwndToolbar, TB_ADDBUTTONS, _countof(buttons), (LPARAM)&buttons);
 
     for (i = 0; i < DX_APP_USE_TEST_CTRLS; ++i)
@@ -544,9 +604,14 @@ HWND doCreateToolbar3(HWND hwnd, INT index, BOOL bHasRebar)
 
 BOOL doCreateRebar(HWND hwnd)
 {
+    DWORD style, exstyle;
+
+    if (!doCreateImageLists())
+        return FALSE;
+
     // TODO: Create a Rebar control
-    DWORD style = WS_CHILD | WS_VISIBLE | RBS_BANDBORDERS | CCS_NODIVIDER | RBS_AUTOSIZE;
-    DWORD exstyle = WS_EX_TOOLWINDOW;
+    style = WS_CHILD | WS_VISIBLE | RBS_BANDBORDERS | CCS_NODIVIDER | RBS_AUTOSIZE;
+    exstyle = WS_EX_TOOLWINDOW;
     g_hRebar = CreateWindowEx(exstyle, REBARCLASSNAME, NULL, style,
         0, 0, 0, 0, hwnd, (HMENU)(INT_PTR)IDW_REBAR, g_hInstance, NULL);
     if (!g_hRebar)
@@ -567,12 +632,12 @@ BOOL doCreateRebar(HWND hwnd)
         return FALSE;
 
 #ifdef DX_APP_USE_TEST_CTRLS
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 3);
+    static_assert(DX_APP_NUM_TOOLBARS == 3, "TODO:");
     g_hToolbars[2] = doCreateToolbar3(g_hRebar, 2, g_hRebar != NULL);
     if (!g_hToolbars[1])
         return FALSE;
 #else
-    STATIC_ASSERT(DX_APP_NUM_TOOLBARS == 2);
+    static_assert(DX_APP_NUM_TOOLBARS == 2, "TODO:");
 #endif
 
     {
@@ -627,7 +692,11 @@ BOOL createControls(HWND hwnd)
         return FALSE;
 
     // We have to receive EN_CHANGE from richedit
-    SendMessage(g_hCanvasWnd, EM_SETEVENTMASK, 0, ENM_CHANGE | ENM_DROPFILES);
+    {
+        DWORD dwMask = (DWORD)SendMessage(g_hCanvasWnd, EM_GETEVENTMASK, 0, 0);
+        SendMessage(g_hCanvasWnd, EM_SETEVENTMASK, 0,
+                    dwMask | ENM_CHANGE | ENM_DROPFILES | ENM_MOUSEEVENTS);
+    }
 
     // TODO: Set canvas font
     //SetWindowFont(g_hCanvasWnd, GetStockFont(DEFAULT_GUI_FONT), TRUE);
@@ -661,12 +730,25 @@ void destroyControls(HWND hwnd)
     });
 #endif
 
+#ifndef DX_APP_NEED_DIET
+    ARRAY_FOREACH(CommandUI ui, s_CommandUI, {
+        if (ui.hbmIcon)
+            DeleteObject(ui.hbmIcon);
+    });
+#endif
+
     DestroyWindow(g_hRebar);
     DestroyWindow(g_hStatusBar);
 
-    ARRAY_FOREACH(HIMAGELIST himl, s_himlToolbars, {
-        ImageList_Destroy(himl);
-    });
+    {
+        size_t i;
+        for (i = 0; i < 2; ++i)
+        {
+            ARRAY_FOREACH(HIMAGELIST himl, s_himls[i], {
+                ImageList_Destroy(himl);
+            });
+        }
+    }
 
     if (s_hCanvasFont)
     {
