@@ -183,8 +183,7 @@ void loadMenuBitmaps(HMENU hMenu)
         }
         SelectObject(hdc, hbmOld);
 
-        info->hbmIcon = hbm;
-        mii.hbmpItem = hbm;
+        info->hbmIcon = mii.hbmpItem = hbm;
         SetMenuItemInfo(hMenu, i, TRUE, &mii);
     }
     DeleteDC(hdc);
