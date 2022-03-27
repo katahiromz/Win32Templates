@@ -1,12 +1,13 @@
 #include "stdafx.h"
 
 #define DX_APP_NUM_PANELS 3
+#define DX_APP_NUM_ICONS 3
 
 HINSTANCE g_hInstance = NULL;
 HWND g_hMainWnd = NULL;
 HWND g_hCanvasWnd = NULL;
 HWND g_hwndPanels[DX_APP_NUM_PANELS] = { NULL };
-HICON g_hIcons[3] = { NULL, NULL, NULL };
+HICON g_hIcons[DX_APP_NUM_ICONS] = { NULL, NULL, NULL };
 
 INT g_iActivePanel = 0;
 #define HWND_ACTIVE_PANEL g_hwndPanels[g_iActivePanel]
@@ -42,6 +43,8 @@ void activatePage(INT iPanel)
     g_iActivePanel = iPanel;
 
     // TODO: Set button icons
+    static_assert(DX_APP_NUM_PANELS == 3, "");
+    static_assert(DX_APP_NUM_ICONS == 3, "");
     switch (iPanel)
     {
     case 0:
@@ -98,6 +101,7 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
     g_hMainWnd = hwnd;
     CenterWindowDx(hwnd);
 
+    static_assert(DX_APP_NUM_ICONS == 3, "");
     g_hIcons[0] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_BACK));
     ASSERT(g_hIcons[0]);
     g_hIcons[1] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_NEXT));
@@ -274,9 +278,11 @@ void OnSize(HWND hwnd, UINT state, int cx, int cy)
 
 void OnDestroy(HWND hwnd)
 {
+    static_assert(DX_APP_NUM_ICONS == 3, "");
     DestroyIcon(g_hIcons[0]);
     DestroyIcon(g_hIcons[1]);
     DestroyIcon(g_hIcons[2]);
+
     PostQuitMessage(0);
 }
 
@@ -358,11 +364,25 @@ BOOL doInitApp(HINSTANCE hInstance, LPSTR lpCmdLine, INT nCmdShow)
 INT doRun(void)
 {
     MSG msg;
+    BOOL bContinue;
+
     while (GetMessage(&msg, NULL, 0, 0))
     {
+        bContinue = FALSE;
+        ARRAY_FOREACH(HWND hwndDlg, g_hwndPanels, {
+            if (hwndDlg && IsDialogMessage(hwndDlg, &msg))
+            {
+                bContinue = TRUE;
+                break;
+            }
+        });
+        if (bContinue)
+            continue;
+
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
     return (INT)msg.wParam;
 }
 
