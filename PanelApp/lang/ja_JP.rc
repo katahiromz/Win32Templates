@@ -20,6 +20,16 @@ IDR_MAINMENU MENU
     }
 }
 
+IDR_POPUPMENUS MENU
+{
+    POPUP "Popup #0"
+    {
+        MENUITEM "バージョン情報", ID_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "終了(&X)\tAlt+F4", ID_EXIT
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // RT_DIALOG
 
@@ -41,6 +51,7 @@ FONT 12, "MS UI Gothic"
     LTEXT "このアプリは、ウィザードスタイルのウィンドウアプリです。\n\n「次へ」ボタンをクリックして下さい。", -1, 5, 10, 95, 60
     PUSHBUTTON "戻る", psh1, 5, 140, 45, 15, NOT WS_VISIBLE
     PUSHBUTTON "次へ", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 IDD_PANEL2 DIALOG 0, 0, 105, 160
@@ -51,6 +62,7 @@ FONT 12, "MS UI Gothic"
     LTEXT "パネル２です。とりあえず「次へ」ボタンをクリックして下さい。\n\n戻りたいときは「戻る」ボタンをクリックして下さい。", -1, 5, 10, 95, 60
     PUSHBUTTON "戻る", psh1, 5, 140, 45, 15
     PUSHBUTTON "次へ", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 IDD_PANEL3 DIALOG 0, 0, 105, 160
@@ -61,6 +73,7 @@ FONT 12, "MS UI Gothic"
     LTEXT "パネル３です。これでこのアプリは終了です。「完了」ボタンをクリックして終了して下さい。", -1, 5, 10, 95, 60
     PUSHBUTTON "戻る", psh1, 5, 140, 45, 15
     DEFPUSHBUTTON "完了", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -77,10 +90,10 @@ FILETYPE        0x1
         BLOCK "041103A4"
         {
             VALUE "CompanyName", "私の会社\0"
-            VALUE "FileDescription", "WindowApp\0"
+            VALUE "FileDescription", "PanelApp\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "LegalCopyright", "Copyright (C) 2022 私の会社. All rights reserved.\0"
-            VALUE "ProductName", "WindowApp\0"
+            VALUE "ProductName", "PanelApp\0"
             VALUE "ProductVersion", "0.0\0"
         }
     }
@@ -96,9 +109,9 @@ FILETYPE        0x1
 STRINGTABLE
 {
     IDS_FAILREGCLASS, "ウィンドウクラスの登録に失敗しました。"
-    IDS_TITLE, "WindowApp"
+    IDS_TITLE, "PanelApp"
     IDS_FAILCREATEWND, "ウィンドウの作成に失敗しました。"
-    IDS_APPNAME, "WindowApp"
+    IDS_APPNAME, "PanelApp"
 }
 
 //////////////////////////////////////////////////////////////////////////////

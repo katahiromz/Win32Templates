@@ -11,8 +11,10 @@
 #define IDI_MAIN                            100
 #define IDI_BACK                            101
 #define IDI_NEXT                            102
+#define IDI_HAMBURGER                       103
 
 #define IDR_MAINMENU                        100
+#define IDR_POPUPMENUS                      101
 
 #define IDS_FAILREGCLASS                    100
 #define IDS_TITLE                           101
@@ -26,7 +28,7 @@
 #ifdef APSTUDIO_INVOKED
     #ifndef APSTUDIO_READONLY_SYMBOLS
         #define _APS_NO_MFC                 1
-        #define _APS_NEXT_RESOURCE_VALUE    101
+        #define _APS_NEXT_RESOURCE_VALUE    102
         #define _APS_NEXT_COMMAND_VALUE     103
         #define _APS_NEXT_CONTROL_VALUE     1000
         #define _APS_NEXT_SYMED_VALUE       300

@@ -10,5 +10,3 @@
 
 void activatePage(INT iPanel);
 void panel_OnActivated(HWND hwndDlg, INT iPanel);
-void panel_OnBack(HWND hwndDlg, INT iPanel);
-void panel_OnForward(HWND hwndDlg, INT iPanel);

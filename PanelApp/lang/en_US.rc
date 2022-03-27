@@ -20,6 +20,16 @@ IDR_MAINMENU MENU
     }
 }
 
+IDR_POPUPMENUS MENU
+{
+    POPUP "Popup #0"
+    {
+        MENUITEM "About...", ID_ABOUT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+F4", ID_EXIT
+    }
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // RT_DIALOG
 
@@ -41,6 +51,7 @@ FONT 12, "Tahoma"
     LTEXT "This app is a wizard-style window app.\n\nClick the ""Next"" button.", -1, 5, 10, 95, 60
     PUSHBUTTON "Back", psh1, 5, 140, 45, 15, NOT WS_VISIBLE
     PUSHBUTTON "Next", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 IDD_PANEL2 DIALOG 0, 0, 105, 160
@@ -51,6 +62,7 @@ FONT 12, "Tahoma"
     LTEXT "This is Panel 2.Please click the ""Next"" button.\n\nIf you want to go back, click the ""Back"" button.", -1, 5, 10, 95, 60
     PUSHBUTTON "Back", psh1, 5, 140, 45, 15
     PUSHBUTTON "Next", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 IDD_PANEL3 DIALOG 0, 0, 105, 160
@@ -61,6 +73,7 @@ FONT 12, "Tahoma"
     LTEXT "This is Panel 3. This is the end of this app. Click the ""Finish"" button to finish.", -1, 5, 10, 95, 60
     PUSHBUTTON "Back", psh1, 5, 140, 45, 15
     DEFPUSHBUTTON "Finish", psh2, 55, 140, 45, 15
+    PUSHBUTTON "", psh8, 5, 115, 20, 20, BS_ICON
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -77,10 +90,10 @@ FILETYPE        0x1
         BLOCK "040904E4"
         {
             VALUE "CompanyName", "My Company\0"
-            VALUE "FileDescription", "WindowApp\0"
+            VALUE "FileDescription", "PanelApp\0"
             VALUE "FileVersion", "0.0\0"
             VALUE "LegalCopyright", "Copyright (C) 2017 My Company. All rights reserved.\0"
-            VALUE "ProductName", "WindowApp\0"
+            VALUE "ProductName", "PanelApp\0"
             VALUE "ProductVersion", "0.0\0"
         }
     }
@@ -96,9 +109,9 @@ FILETYPE        0x1
 STRINGTABLE
 {
     IDS_FAILREGCLASS, "Failed to register window classes."
-    IDS_TITLE, "WindowApp"
+    IDS_TITLE, "PanelApp"
     IDS_FAILCREATEWND, "Failed to create the main window."
-    IDS_APPNAME, "WindowApp"
+    IDS_APPNAME, "PanelApp"
 }
 
 //////////////////////////////////////////////////////////////////////////////

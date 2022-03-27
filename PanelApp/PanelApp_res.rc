@@ -20,6 +20,8 @@ IDI_BACK ICON "res/Icon_101.ico"
 
 IDI_NEXT ICON "res/Icon_102.ico"
 
+IDI_HAMBURGER ICON "res/Icon_103.ico"
+
 //////////////////////////////////////////////////////////////////////////////
 // RT_MANIFEST
 

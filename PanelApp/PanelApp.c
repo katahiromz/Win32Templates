@@ -6,7 +6,7 @@ HINSTANCE g_hInstance = NULL;
 HWND g_hMainWnd = NULL;
 HWND g_hCanvasWnd = NULL;
 HWND g_hwndPanels[DX_APP_NUM_PANELS] = { NULL };
-HICON g_hIcons[2] = { NULL, NULL };
+HICON g_hIcons[3] = { NULL, NULL, NULL };
 
 INT g_iActivePanel = 0;
 #define HWND_ACTIVE_PANEL g_hwndPanels[g_iActivePanel]
@@ -36,12 +36,25 @@ DLGPROC panelDlgProcs[DX_APP_NUM_PANELS] =
 
 void activatePage(INT iPanel)
 {
+    // TODO: Switch the panel
     ShowWindow(g_hwndPanels[g_iActivePanel], SW_HIDE);
     ShowWindow(g_hwndPanels[iPanel], SW_SHOW);
     g_iActivePanel = iPanel;
 
-    SendDlgItemMessage(HWND_ACTIVE_PANEL, psh1, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[0]);
-    SendDlgItemMessage(HWND_ACTIVE_PANEL, psh2, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[1]);
+    // TODO: Set button icons
+    switch (iPanel)
+    {
+    case 0:
+    case 1:
+        SendDlgItemMessage(HWND_ACTIVE_PANEL, psh1, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[0]);
+        SendDlgItemMessage(HWND_ACTIVE_PANEL, psh2, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[1]);
+        SendDlgItemMessage(HWND_ACTIVE_PANEL, psh8, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[2]);
+        break;
+    case 2:
+        SendDlgItemMessage(HWND_ACTIVE_PANEL, psh1, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[0]);
+        SendDlgItemMessage(HWND_ACTIVE_PANEL, psh8, BM_SETIMAGE, IMAGE_ICON, (LPARAM)g_hIcons[2]);
+        break;
+    }
 
     InvalidateRect(g_hCanvasWnd, NULL, TRUE);
     PostMessage(g_hMainWnd, WM_SIZE, 0, 0);
@@ -50,38 +63,6 @@ void activatePage(INT iPanel)
 void panel_OnActivated(HWND hwndDlg, INT iPanel)
 {
     // TODO:
-}
-
-void panel_OnBack(HWND hwndDlg, INT iPanel)
-{
-    switch (iPanel)
-    {
-    case 0:
-        ASSERT(0);
-        break;
-    case 1:
-        activatePage(0);
-        break;
-    case 2:
-        activatePage(1);
-        break;
-    }
-}
-
-void panel_OnForward(HWND hwndDlg, INT iPanel)
-{
-    switch (iPanel)
-    {
-    case 0:
-        activatePage(1);
-        break;
-    case 1:
-        activatePage(2);
-        break;
-    case 2:
-        DestroyWindow(g_hMainWnd);
-        break;
-    }
 }
 
 BOOL createControls(HWND hwnd)
@@ -121,6 +102,8 @@ BOOL OnCreate(HWND hwnd, LPCREATESTRUCT lpCreateStruct)
     ASSERT(g_hIcons[0]);
     g_hIcons[1] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_NEXT));
     ASSERT(g_hIcons[1]);
+    g_hIcons[2] = LoadIcon(g_hInstance, MAKEINTRESOURCE(IDI_HAMBURGER));
+    ASSERT(g_hIcons[2]);
 
     if (!createControls(hwnd))
         return FALSE;
@@ -168,6 +151,34 @@ void OnAbout(HWND hwnd)
     DialogBox(g_hInstance, MAKEINTRESOURCE(IDD_ABOUT), hwnd, AboutDialogProc);
 }
 
+void OnHamburgerMenu(HWND hwnd)
+{
+    RECT rc;
+    HWND hPsh8 = GetDlgItem(HWND_ACTIVE_PANEL, psh8);
+    HMENU hMenu = LoadMenu(g_hInstance, MAKEINTRESOURCE(IDR_POPUPMENUS));
+    HMENU hSubMenu = GetSubMenu(hMenu, 0);
+    INT id;
+    TPMPARAMS params = { sizeof(params) };
+    POINT pt;
+    UINT uFlags;
+
+    GetWindowRect(hPsh8, &rc);
+
+    SetForegroundWindow(hwnd);
+    pt.x = rc.left;
+    pt.y = (rc.top + rc.bottom) / 2;
+    uFlags = TPM_VERTICAL | TPM_LEFTBUTTON | TPM_LEFTALIGN | TPM_RETURNCMD;
+    params.rcExclude = rc;
+    id = TrackPopupMenuEx(hSubMenu, uFlags, pt.x, pt.y, hwnd, &params);
+    if (id)
+    {
+        PostMessage(hwnd, WM_COMMAND, id, 0);
+    }
+
+    PostMessage(hwnd, WM_NULL, 0, 0);
+    DestroyMenu(hMenu);
+}
+
 void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
     switch (id)
@@ -180,6 +191,37 @@ void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
         break;
     case ID_TEST:
         MsgBoxDx(hwnd, TEXT("This is a test"), LoadStringDx(IDS_APPNAME), MB_ICONINFORMATION);
+        break;
+    case psh1: // Back
+        switch (g_iActivePanel)
+        {
+        case 0:
+            ASSERT(0);
+            break;
+        case 1:
+            activatePage(0);
+            break;
+        case 2:
+            activatePage(1);
+            break;
+        }
+        break;
+    case psh2: // Next or Finish
+        switch (g_iActivePanel)
+        {
+        case 0:
+            activatePage(1);
+            break;
+        case 1:
+            activatePage(2);
+            break;
+        case 2:
+            DestroyWindow(g_hMainWnd);
+            break;
+        }
+        break;
+    case psh8:
+        OnHamburgerMenu(hwnd);
         break;
     }
 }
@@ -234,7 +276,14 @@ void OnDestroy(HWND hwnd)
 {
     DestroyIcon(g_hIcons[0]);
     DestroyIcon(g_hIcons[1]);
+    DestroyIcon(g_hIcons[2]);
     PostQuitMessage(0);
+}
+
+void OnGetMinMaxInfo(HWND hwnd, LPMINMAXINFO lpMinMaxInfo)
+{
+    lpMinMaxInfo->ptMinTrackSize.x = g_sizInitialDlg.cx + 128;
+    lpMinMaxInfo->ptMinTrackSize.y = g_sizInitialDlg.cy + 64;
 }
 
 LRESULT CALLBACK
@@ -248,6 +297,7 @@ WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         HANDLE_MSG(hwnd, WM_ERASEBKGND, OnEraseBkgnd);
         HANDLE_MSG(hwnd, WM_PAINT, OnPaint);
         HANDLE_MSG(hwnd, WM_SIZE, OnSize);
+        HANDLE_MSG(hwnd, WM_GETMINMAXINFO, OnGetMinMaxInfo);
         HANDLE_MSG(hwnd, WM_DESTROY, OnDestroy);
     default:
         return DefWindowProc(hwnd, uMsg, wParam, lParam);

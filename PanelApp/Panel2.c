@@ -13,10 +13,9 @@ static void OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
     switch (id)
     {
     case psh1:
-        panel_OnBack(hwnd, PANEL_INDEX);
-        break;
     case psh2:
-        panel_OnForward(hwnd, PANEL_INDEX);
+    case psh8:
+        PostMessage(GetParent(hwnd), WM_COMMAND, MAKEWPARAM(id, codeNotify), 0);
         break;
     }
 }
