@@ -4,7 +4,7 @@
 
 static BOOL OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
-    panel_OnActivated(hwnd, PANEL_INDEX);
+    panel_OnInit(hwnd, PANEL_INDEX);
     return TRUE;
 }
 

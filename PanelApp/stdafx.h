@@ -9,4 +9,4 @@
 #define IDW_STATUSBAR 1
 
 void activatePage(INT iPanel);
-void panel_OnActivated(HWND hwndDlg, INT iPanel);
+void panel_OnInit(HWND hwndDlg, INT iPanel);
