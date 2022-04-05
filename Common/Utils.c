@@ -525,7 +525,7 @@ double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated)
 
     ret = _tcstod(szText, &endptr);
     if (*endptr)
-        return 0;
+        return ret;
 
     if (pTranslated)
         *pTranslated = TRUE;
