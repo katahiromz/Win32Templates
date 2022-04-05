@@ -511,7 +511,7 @@ double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated)
     double ret;
 
     if (pTranslated)
-        *pTranslated = 0;
+        *pTranslated = FALSE;
 
     hwndCtrl = GetDlgItem(hDlg, nItemID);
     ASSERT(hwndCtrl != NULL);
@@ -520,6 +520,8 @@ double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated)
 
     if (!GetWindowText(hwndCtrl, szText, _countof(szText)))
         return 0;
+
+    StrTrim(szText, TEXT(" \t\r\n"));
 
     ret = _tcstod(szText, &endptr);
     if (*endptr)
