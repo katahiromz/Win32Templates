@@ -12,7 +12,7 @@ if(WIN32)
 
     # ConsoleApp++.exe
     add_executable(ConsoleApp++ ConsoleApp.cpp ConsoleApp_res.rc)
-    target_link_libraries(ConsoleApp++ Common)
+    target_link_libraries(ConsoleApp++ Common shlwapi)
 else()
     # project name and languages
     project(ConsoleApp++ CXX)

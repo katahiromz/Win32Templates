@@ -17,7 +17,7 @@ add_executable(PanelApp WIN32
 	Panel3.c
 	PanelApp.c PanelApp_res.rc
 )
-target_link_libraries(PanelApp comctl32 shell32 shlwapi Common)
+target_link_libraries(PanelApp Common comctl32 shell32 shlwapi)
 #target_compile_definitions(PanelApp PRIVATE -DUNICODE -D_UNICODE)
 
 ##############################################################################

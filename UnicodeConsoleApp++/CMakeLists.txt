@@ -11,7 +11,7 @@ project(ConsoleApp++ CXX RC)
 
 # UnicodeConsoleApp++.exe
 add_executable(UnicodeConsoleApp++ UnicodeConsoleApp.cpp UnicodeConsoleApp_res.rc)
-target_link_libraries(UnicodeConsoleApp++ Common)
+target_link_libraries(UnicodeConsoleApp++ Common shlwapi)
 target_compile_definitions(UnicodeConsoleApp++ PRIVATE -DUNICODE -D_UNICODE)
 
 ##############################################################################
