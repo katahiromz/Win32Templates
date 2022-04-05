@@ -327,16 +327,16 @@ INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
     }
 
     *ppData = pData;
-    return 0;
+    return 0; // success
 #else
     FILE *fin;
     size_t size, readLen;
     char *pData;
-#ifdef _WIN32
-    struct _stat st;
-#else
-    struct stat st;
-#endif
+    #ifdef _WIN32
+        struct _stat st;
+    #else
+        struct stat st;
+    #endif
 
     assert(psize != NULL);
     assert(ppData != NULL);
