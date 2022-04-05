@@ -290,6 +290,45 @@ INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size)
 
 INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
 {
+#if 1
+    HANDLE hFile;
+    ULARGE_INTEGER fileSize;
+    DWORD cbRead;
+    char *pData;
+
+    hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+                       OPEN_EXISTING, 0, NULL);
+    if (hFile == INVALID_HANDLE_VALUE)
+        return -2;
+
+    fileSize.LowPart = GetFileSize(hFile, &fileSize.HighPart);
+    if (fileSize.HighPart > 0 || fileSize.LowPart > 0x7FFFFFFF - 3)
+        return -1;
+
+    pData = malloc(fileSize.LowPart + 3);
+    if (!pData)
+    {
+        CloseHandle(hFile);
+        return -3;
+    }
+
+    ReadFile(hFile, pData, fileSize.LowPart, &cbRead, NULL);
+
+    pData[fileSize.LowPart + 0] = 0;
+    pData[fileSize.LowPart + 1] = 0;
+    pData[fileSize.LowPart + 2] = 0;
+
+    CloseHandle(hFile);
+
+    if (cbRead != fileSize.LowPart)
+    {
+        free(pData);
+        return -4;
+    }
+
+    *ppData = pData;
+    return 0;
+#else
     FILE *fin;
     size_t size, readLen;
     char *pData;
@@ -304,7 +343,7 @@ INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
 
     *ppData = NULL;
 
-    if (_tstat(filename, &st) != 0)
+    if (_tstat(filename, &st) != 0 || st.st_size > 0x7FFFFFFF - 3)
         return -1;
 
     *psize = size = st.st_size;
@@ -313,7 +352,7 @@ INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
     if (!fin)
         return -2;
 
-    pData = malloc(size + 1); // including NUL
+    pData = malloc(size + 3);
     if (!pData)
     {
         fclose(fin);
@@ -321,7 +360,9 @@ INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
     }
 
     readLen = fread(pData, 1, size, fin);
-    pData[size] = 0; // set NUL
+    pData[size + 0] = 0;
+    pData[size + 1] = 0;
+    pData[size + 2] = 0;
 
     fclose(fin);
 
@@ -333,6 +374,7 @@ INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize)
 
     *ppData = pData;
     return 0; // success
+#endif
 }
 
 void RebootDx(BOOL bForce)
