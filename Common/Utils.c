@@ -580,7 +580,7 @@ double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated)
     return ret;
 }
 
-BOOL setDlgItemDouble(HWND hDlg, INT nItemID, double eValue)
+BOOL setDlgItemDouble(HWND hDlg, INT nItemID, double eValue, LPCTSTR pszFormat)
 {
     HWND hwndCtrl;
     TCHAR szText[256];
@@ -590,6 +590,9 @@ BOOL setDlgItemDouble(HWND hDlg, INT nItemID, double eValue)
     if (!hwndCtrl)
         return FALSE;
 
-    StringCchPrintf(szText, _countof(szText), TEXT("%g"), eValue);
+    if (!pszFormat)
+        pszFormat = TEXT("%g");
+
+    StringCchPrintf(szText, _countof(szText), pszFormat, eValue);
     return SetWindowText(hwndCtrl, szText);
 }
