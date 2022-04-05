@@ -19,6 +19,9 @@ LPWSTR GetWindowTextDxW(HWND hwnd); // free
 #define GetDlgItemTextDxW(hwnd, id) GetWindowTextDxW(GetDlgItem((hwnd), (id))) // free
 INT ReadFromFileDx(LPCTSTR filename, void **ppData, size_t *psize); // free
 INT WriteToFileDx(LPCTSTR filename, const void *pData, size_t size);
+double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated);
+BOOL setDlgItemDouble(HWND hDlg, INT nItemID, double eValue);
+
 void AssertDx(const char *text, const char *file, int line);
 void DebugPrintfDxA(const char *fmt, ...);
 void DebugPrintfDxW(const wchar_t *fmt, ...);

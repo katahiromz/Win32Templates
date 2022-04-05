@@ -551,3 +551,45 @@ SIZE GetTextExtentDx(LPCTSTR pszText, HFONT hFont)
     DeleteDC(hDC);
     return ret;
 }
+
+double getDlgItemDouble(HWND hDlg, INT nItemID, BOOL *pTranslated)
+{
+    HWND hwndCtrl;
+    TCHAR szText[256];
+    TCHAR *endptr;
+    double ret;
+
+    if (pTranslated)
+        *pTranslated = 0;
+
+    hwndCtrl = GetDlgItem(hDlg, nItemID);
+    ASSERT(hwndCtrl != NULL);
+    if (!hwndCtrl)
+        return 0;
+
+    if (!GetWindowText(hwndCtrl, szText, _countof(szText)))
+        return 0;
+
+    ret = _tcstod(szText, &endptr);
+    if (*endptr)
+        return 0;
+
+    if (pTranslated)
+        *pTranslated = TRUE;
+
+    return ret;
+}
+
+BOOL setDlgItemDouble(HWND hDlg, INT nItemID, double eValue)
+{
+    HWND hwndCtrl;
+    TCHAR szText[256];
+
+    hwndCtrl = GetDlgItem(hDlg, nItemID);
+    ASSERT(hwndCtrl != NULL);
+    if (!hwndCtrl)
+        return FALSE;
+
+    StringCchPrintf(szText, _countof(szText), TEXT("%g"), eValue);
+    return SetWindowText(hwndCtrl, szText);
+}
